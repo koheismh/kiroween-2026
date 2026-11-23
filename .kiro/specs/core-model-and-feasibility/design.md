@@ -11,7 +11,8 @@
 | Signing | Ed25519 via `node:crypto` and WebCrypto. Passphrase-protected key outside the repo. | An agent without the passphrase cannot forge approval. A developer with key and repo control can. Stated in the README. |
 | Ground truth protection | Human-run attest command writes a lock digest. Gate compares directory to lock. Hooks ask before agent writes. | Detects modification. Does not prove examples are right. The human checks them against sources. |
 | Numbers | Integers only. Rates in basis points. Rounding mode named per operation. | Verbose rules. Avoids floating-point drift. |
-| Crew placement | `crew/` app, separate from runtime. It reads proposal and gate-report files and writes a review note. | Adds no runtime dependency. Duplicates no workflow logic. |
+| Crew placement | Separate repository (`changeling-crew`, name provisional). It reads proposal and gate-report files and writes a review note. This repo holds only the file format it consumes and produces. | Adds no runtime dependency and duplicates no workflow logic. Needs a second repository and a documented install step. |
+| Approval gating | Approve and load both require a gate report bound to the current pack digest with every skeleton-declared gate passed. | Stricter than signing alone. A failing or stale report can never be approved. |
 
 ## Data model (sketch)
 

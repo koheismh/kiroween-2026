@@ -21,9 +21,9 @@ apps/<app>/proposals/     agent-drafted rule changes and review notes
 apps/<app>/approvals/     signed approval records (agents must not edit)
 apps/<app>/web/           UI
 spikes/                   throwaway time-boxed experiments; results go to docs/spikes/
-crew/                     Kiro Crew app (separate from runtime)
 docs/                     spike results and decision log only
 ```
+The Kiro Crew app lives in a separate repository (`changeling-crew`, provisional). This repo defines only the file formats it reads and writes. It is never a runtime dependency.
 Domain-neutral code belongs in `packages/core`. If app code needs domain-specific rule logic that cannot be expressed in the rule pack, record it in `docs/decisions.md`.
 
 ## Conventions

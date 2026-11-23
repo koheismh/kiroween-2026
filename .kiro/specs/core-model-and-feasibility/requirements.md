@@ -42,6 +42,8 @@ The spikes exist to answer five questions. Each has a go/no-go exit criterion an
 2. An approval record SHALL contain the pack digest, gate report digest, ground-truth lock digest, approver key id, and timestamp, signed with Ed25519.
 3. The loader SHALL refuse a pack when the digest or signature does not verify, returning a typed error that names the failing check.
 4. The approver private key SHALL be passphrase-protected and stored outside the repository.
+5. The approve command SHALL refuse to sign unless a gate report exists for the current pack digest and every required gate in it has passed. The loader SHALL apply the same check, so an approval record over a failing or stale gate report is rejected.
+6. Required gates SHALL be declared by the skeleton, not by the proposal. A missing gate counts as failed.
 
 ### R6: Independent ground truth
 **User story:** As a maintainer, I want a source of truth that agent-written tests cannot silently alter.
@@ -61,12 +63,12 @@ The spikes exist to answer five questions. Each has a go/no-go exit criterion an
 ### R8: Feasibility spikes with go/no-go
 **User story:** As the developer, I want each risky assumption tested early so that I can change the plan within two days.
 
-Each spike SHALL have a time box, an exit criterion, and a recorded result in `docs/spikes/<id>.md` stating GO, GO-WITH-FALLBACK, or NO-GO and the evidence.
+Spikes run in this order: S2 (availability) and S4 (Crew) before S1 (evaluator), so that the evaluator is not built on sources or a Crew path that turn out to be unavailable. Each spike SHALL have a time box, an exit criterion, and a recorded result in `docs/spikes/<id>.md` stating GO, GO-WITH-FALLBACK, or NO-GO and the evidence.
 
 | Spike | Question | Exit criterion (GO) | Fallback |
 |---|---|---|---|
 | S1 | Can the expression model encode both apps' old and new rules? | US 2025 original and revised, and JP pre- and post-reform rules for the supported scope, evaluate correctly with no app-specific rule code. At most 3 operators added after the initial set. | Declare derived facts (e.g. child order) in app code, record in `docs/decisions.md`, and disclose. |
-| S2 | Do clean before/after official sources exist and extract correctly? | Original and revised US sources and JP post-reform source are snapshotted with hashes. A JP "before" source exists, or a documented substitute. Quote check passes on Japanese and English samples. | Use the closest archived or legal-text source and label the limitation. |
+| S2 (availability only) | Do clean before/after official sources exist and can they be fetched and hashed? | The three given sources are fetched and hashed. A JP "before" source is identified (URL, date, format), or a documented substitute. Text extraction is checked on one Japanese and one English sample. The citation check itself is built later, in S1. | Use the closest archived or legal-text source and label the limitation. |
 | S3 | Is the approval mechanism simple and tamper-evident? | Sign, verify, and tamper-detection tests pass in Node. Browser verification works, or build-time verification is chosen. | Build-time verification only. |
-| S4 | Can a minimal Kiro Crew app be installed and used as a reviewer? | An app with one reviewer agent is installed from a local path and produces a review note in the defined format from a sample proposal. | Skip Crew. Use a plain Kiro agent with steering and hooks, and state this honestly. |
+| S4 | Can a minimal Kiro Crew app be installed and used as a reviewer? | A skill-only or agent-only app in its own repository is installed from a local path and produces a review note in a fixed format from a sample proposal. The final app lives in a separate repository. | Skip Crew. Use a plain Kiro agent with steering and hooks, and state this honestly. |
 | S5 | Can Kiro draft a proposal that passes the gates from a real source diff? | For the US revision, an agent-drafted proposal passes schema, citation, and ground-truth gates, or the failures are recorded. | "Kiro drafts, human edits", disclosed as such. |
