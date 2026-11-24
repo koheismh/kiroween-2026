@@ -16,7 +16,7 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
 - [x] 2. S2: Source availability (box: 90 min) - GO, see `docs/spikes/s2.md`
   - [x] 2.1 Script `scripts/snapshot.mjs` that fetches a URL, stores bytes and extracted text, and records URL, final URL, status, content type, timestamp, and SHA-256
   - [x] 2.2 Snapshot the three given sources plus two Wayback captures (JP "before" 2023-12-04 and JP "after" 2024-07-31). Five snapshots are committed under `apps/*/sources/` (about 1.1 MB). `.gitattributes` keeps their bytes unchanged. All five hashes were re-verified after copying.
-  - [x] 2.3 JP "before" source identified (Wayback capture of the CFA "児童手当制度のご案内" page). Second-source oracles listed as candidates only: the two CFA PDFs and the IRS Form 1040 instructions. None fetched or attested.
+  - [x] 2.3 JP "before" source identified (Wayback capture of the CFA "å…ç«¥æ‰‹å½“åˆ¶åº¦ã®ã”æ¡ˆå†…" page). Second-source oracles listed as candidates only: the two CFA PDFs and the IRS Form 1040 instructions. None fetched or attested.
   - [x] 2.4 Write `docs/spikes/s2.md` with the verdict
   - [x] 2.5 Check licensing: CFA content is under Public Data License 1.0 with attribution. IRS licence statement not verified.
   - [x] 2.6 **Human:** confirm the five snapshots are the intended documents (approved 2026-11-24)
@@ -50,12 +50,12 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
     - [x] 5.8.2 Reject dates after the evaluation period via `notAfterPeriod` (code `DATE_AFTER_PERIOD`). JP birth dates use it. Redundant rule guards removed and the JP pack regenerated. _Requirements: R4.3_
     - [x] 5.8.3 Regression tests: tampered text, tampered bytes, forged metadata, missing file, fully rewritten snapshot, fake quote in `extracted.txt`, and a birth date after the period (unit test plus candidate `jp-u7`). _Requirements: R4.3, R7.2, R7.4_  - _Requirements: R1, R2, R3, R4, R7, R8_
 
-- [ ] 6. S3: Approval integrity (box: 2 h) - not started
-  - [ ] 6.1 Canonical JSON, digests, Ed25519 sign and verify with `node:crypto`
-  - [ ] 6.2 Gate report format and the required-gate list declared by the skeleton
-  - [ ] 6.3 CLI `keygen`, `approve`, `verify`. `approve` and the loader fail when any required gate failed, is missing, or is bound to a different pack digest.
-  - [ ] 6.4 Tests: tamper detection for pack, gate report, ground-truth lock, and signature; approval refused on failed, missing, and stale gates
-  - [ ] 6.5 Test WebCrypto Ed25519 verification in a real browser, or choose build-time verification
+- [~] 6. S3: Approval integrity (box: 2 h) - GO, see `docs/spikes/s3.md`; 6.6 is a human step
+  - [x] 6.1 Canonical JSON, digests, Ed25519 sign and verify with `node:crypto`
+  - [x] 6.2 Gate report format and the required-gate list declared by the skeleton
+  - [x] 6.3 CLI `keygen`, `approve`, `verify`. `approve` and the loader fail when any required gate failed, is missing, or is bound to a different pack digest.
+  - [x] 6.4 Tests: tamper detection for pack, gate report, ground-truth lock, and signature; approval refused on failed, missing, and stale gates
+  - [x] 6.5 Test WebCrypto Ed25519 verification in a real browser, or choose build-time verification (GO on Edge and Chrome 158, see `docs/spikes/s3.md`)
   - [ ] 6.6 **Human:** run `keygen` and keep the passphrase private
   - _Requirements: R5, R8_
 

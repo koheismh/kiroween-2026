@@ -5,4 +5,7 @@ export * from "./model.js";
 export * from "./evaluator.js";
 export * from "./temporal.js";
 export * from "./citations.js";
+export * from "./canonical.js";
+export * from "./gates.js";
+export * from "./webverify.js";
 export { isIsoDate, completedYears, throughMarch31After } from "./dates.js";
