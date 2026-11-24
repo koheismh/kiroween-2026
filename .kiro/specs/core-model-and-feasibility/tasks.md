@@ -1,4 +1,4 @@
-# Tasks: Core Model and Feasibility Spikes
+﻿# Tasks: Core Model and Feasibility Spikes
 
 Time boxes are hard limits. At the limit, stop, record the result in `docs/spikes/<id>.md`, and report GO, GO-WITH-FALLBACK, or NO-GO. Do not extend a box without approval. Commit and push after each numbered task (see git-workflow steering).
 
@@ -10,23 +10,23 @@ Order: scaffold, then source availability (S2) and Crew feasibility (S4), then t
   - [x] 1.3 Git workflow steering
   - _Requirements: tech and git-workflow steering_
 
-- [ ] 2. S2: Source availability (box: 90 min)
-  - [ ] 2.1 Script `scripts/snapshot.mjs` that fetches a URL, stores bytes and extracted text, and records URL, timestamp, and SHA-256
-  - [ ] 2.2 Snapshot the three given sources. Report size, format, and extraction quality. Do not commit large or unclear-license files.
-  - [ ] 2.3 Identify a JP "before" source (archived CFA page, pre-reform legal text) and a second-source oracle for each app. Report what exists. Do not invent any.
-  - [ ] 2.4 Write `docs/spikes/s2.md` with the verdict
+- [x] 2. S2: Source availability (box: 90 min) - GO, see docs/spikes/s2.md
+  - [x] 2.1 Script `scripts/snapshot.mjs` that fetches a URL, stores bytes and extracted text, and records URL, timestamp, and SHA-256
+  - [x] 2.2 Snapshot the three given sources. Report size, format, and extraction quality. Do not commit large or unclear-license files.
+  - [x] 2.3 Identify a JP "before" source (archived CFA page, pre-reform legal text) and a second-source oracle for each app. Report what exists. Do not invent any.
+  - [x] 2.4 Write `docs/spikes/s2.md` with the verdict
   - [ ] 2.5 **Human:** confirm the snapshots are the intended documents
   - _Requirements: R7 (availability only), R8_
 
-- [ ] 3. S4: Crew feasibility (box: 90 min)
-  - [ ] 3.1 Read the Crew App Kit docs and the locally installed Crew version
-  - [ ] 3.2 Create a minimal reviewer app (one agent or skill) in a separate local repository `changeling-crew`
-  - [ ] 3.3 Install it from a local path and run it on a sample proposal. Record whether it produces a review note in the fixed format.
-  - [ ] 3.4 Write `docs/spikes/s4.md` with the verdict and the exact install steps
+- [ ] 3. S4: Crew feasibility (box: 90 min) - installed; waiting for human trust step, see docs/spikes/s4.md
+  - [x] 3.1 Read the Crew App Kit docs and the locally installed Crew version
+  - [x] 3.2 Create a minimal reviewer app (one agent or skill) in a separate local repository `changeling-crew`
+  - [ ] 3.3 Install it from a local path (done) and run it on a sample proposal (blocked: **Human** must trust the app in Crew Settings, then run the reviewer)
+  - [x] 3.4 Write `docs/spikes/s4.md` with the verdict and the exact install steps
   - _Requirements: R8_
 
-- [ ] 4. Checkpoint 1 (box: 15 min)
-  - [ ] 4.1 Push all results. Developer reviews S2 and S4 verdicts.
+- [ ] 4. Checkpoint 1 (box: 15 min) - in progress
+  - [x] 4.1 Push all results. Developer reviews S2 and S4 verdicts.
   - [ ] 4.2 Decide: continue, apply fallbacks, or change scope. Update this plan.
 
 - [ ] 5. S1: Expression model and temporal resolution (box: 4 h)
