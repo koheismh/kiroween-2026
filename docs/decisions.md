@@ -12,3 +12,11 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Crew app repo is local only (`changeling-crew`). The GitHub CLI is not installed, so the remote must be created by the developer.
 - US money is integer cents because IRS tables contain cents.
 
+
+## 2026-11-24: Reviewer agent configuration (design change)
+- Replaced `tools: [@kirocrew-core]` with `fs_read` and `fs_write` restricted to `**/review.md` (auto-approve scope), no shell, web, or MCP. The first config had no file tools. See docs/spikes/s4.md entry 2.
+- Proposal format must reference repo-relative snapshot paths so the reviewer can check quotes and dates.
+- Crew reinstall revokes the per-app trust grant. Prefer the dashboard update action over uninstall and install.
+- Integrity is still carried by gates and signed approval, not by the reviewer.
+- Added steering `records.md`: significant failures, findings, design changes, and verification results are recorded concisely and committed at checkpoints.
+
