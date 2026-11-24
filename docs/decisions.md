@@ -38,3 +38,16 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Snapshot loading no longer trusts `meta.json` or `extracted.txt`: hash is recomputed, text is re-derived with a shared extractor. See docs/spikes/s1.md entry 2.
 - Inputs that a rule would otherwise ignore silently (birth date after the period) are rejected by scope with `DATE_AFTER_PERIOD`.
 
+
+## 2026-11-25: Approver trust anchor, key management, key file protection
+- Finding: `verifyApproval` trusted `approvals/approver.pub` from the repo, so a self-consistent key swap with a valid re-sign passed. Decision: the key id must equal a trust anchor (`apps/<app>/trust-anchor.json`, outside `approvals/`, and/or an out-of-band id via `--trust-key-id`, `CHANGELING_TRUSTED_KEY_ID`, or a web build constant). Failures: `untrusted-key`, and `no-trust-anchor` when none is configured (fail closed). Threat model: design.md "Trust anchor and threat model" and README.
+- Decision: one approver key for both apps, one anchor file per app. Private key outside the repo, backed up offline. Rotation or revocation is a new reviewed anchor commit plus re-running `approve`.
+- Finding: Node exports the encrypted key with PBKDF2 at 2048 iterations. Node cannot change it. Mitigation: 16-character passphrase minimum. Open: a scrypt wrapper if stronger protection is wanted. `mode: 0o600` is a no-op on NTFS, so `keygen` applies an `icacls` ACL and refuses if it fails. Measurements: docs/spikes/s3.md.
+- Task 7.5 added: `approve` recomputes gates itself and ignores stored reports.
+
+## 2026-11-25: Gate report format vs the Crew sample (open, for integration)
+- Status: open, for integration.
+- Fact: no Crew gate-report format is specified in this repo's spec, design, steering, or docs. design.md only says Crew "reads proposal and gate-report files". The only evidence is `docs/spikes/s4.md`, which says the Crew sample `gate-report.json` has the required gate `ground-truth` with status `missing`.
+- Difference (from that evidence): the implemented `GateReport` (`packages/core/src/gates.ts`, `schemaVersion: 1`, `packDigest`, `gates[{id, status: "pass"|"fail", message?}]`, strict) has no `missing` status. A missing gate is an absent entry, and the strict schema rejects a `missing` status as malformed.
+- Not verified: the sample file itself lives in the separate `changeling-crew` repository, outside this workspace, and was not read. Whether it has `schemaVersion` or `packDigest`, and its field names, are unknown. No format is invented here.
+- Next: task 8a in tasks.md. When integrating, read the sample, then change one side (preferably the sample, since the skeleton format is enforced by the loader) and record it.

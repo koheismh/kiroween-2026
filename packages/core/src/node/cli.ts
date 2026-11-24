@@ -3,10 +3,12 @@
 //   changeling approve --app <dir> [--key <path>] [--at YYYY-MM-DD]
 //   changeling verify  --app <dir>
 // Passphrase: env CHANGELING_PASSPHRASE, else a hidden prompt. It is never printed or stored.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, parse, resolve } from "node:path";
 import { isIsoDate } from "../dates.js";
-import { appPath, prepareApp, verifyApp, readPublicKey } from "./approval-files.js";
+import { checkTrustAnchors } from "../trust.js";
+import { appPath, prepareApp, verifyApp, readPublicKey, readTrustAnchors } from "./approval-files.js";
+import { restrictToCurrentUser, type AclResult } from "./acl.js";
 import { generateApproverKey, publicKeyId, signPayload, verifyPayload } from "./signing.js";
 
 export interface CliIo {
@@ -16,11 +18,15 @@ export interface CliIo {
   home: string;
   /** Today's date as YYYY-MM-DD. Only the CLI shell reads the clock; pure functions never do. */
   today(): string;
+  /** Restrict a private key file to the current user (ACL on Windows). Defaults to `restrictToCurrentUser`. */
+  restrictFile?(path: string): AclResult;
   /** Hidden passphrase prompt. Used only when CHANGELING_PASSPHRASE is unset. */
   promptSecret(label: string): Promise<string>;
 }
 
 export const PASSPHRASE_ENV = "CHANGELING_PASSPHRASE";
+/** Out-of-band expected approver key id (alternative to --trust-key-id). */
+export const TRUSTED_KEY_ID_ENV = "CHANGELING_TRUSTED_KEY_ID";
 
 function parseArgs(args: string[]): { opts: Map<string, string>; bad: string | null } {
   const opts = new Map<string, string>();
@@ -52,7 +58,8 @@ async function getPassphrase(io: CliIo, confirm: boolean): Promise<string | null
   return first;
 }
 
-const USAGE = "usage: changeling <keygen|approve|verify> --app <dir> [--key <path>] [--at YYYY-MM-DD]";
+const MIN_PASSPHRASE = 16;
+const USAGE = "usage: changeling <keygen|approve|verify> --app <dir> [--key <path>] [--at YYYY-MM-DD] [--trust-key-id <hex>]";
 
 export async function runCli(argv: string[], io: CliIo): Promise<number> {
   const [cmd, ...rest] = argv;
@@ -70,8 +77,9 @@ export async function runCli(argv: string[], io: CliIo): Promise<number> {
   const appDir = resolve(appArg);
   const keyPath = resolve(opts.get("key") ?? join(io.home, ".changeling", "approver.key"));
 
+  const oob = opts.get("trust-key-id") ?? (io.env[TRUSTED_KEY_ID_ENV] || undefined);
   if (cmd === "verify") {
-    const res = verifyApp(appDir);
+    const res = verifyApp(appDir, oob);
     if (res.ok) {
       io.out(`OK: approved ${res.payload.approvedAt} by key ${res.payload.approverKeyId.slice(0, 16)}`);
       return 0;
@@ -95,18 +103,25 @@ export async function runCli(argv: string[], io: CliIo): Promise<number> {
       io.err("passphrases did not match");
       return 1;
     }
-    if (pass.length < 8) {
-      io.err("passphrase must be at least 8 characters");
+    if (pass.length < MIN_PASSPHRASE) {
+      io.err(`passphrase must be at least ${MIN_PASSPHRASE} characters (the key file uses PBKDF2 with only 2048 iterations)`);
       return 1;
     }
     const kp = generateApproverKey(pass);
     mkdirSync(dirname(keyPath), { recursive: true });
     writeFileSync(keyPath, kp.privateKeyPem, { flag: "wx", mode: 0o600 });
+    const acl = (io.restrictFile ?? restrictToCurrentUser)(keyPath);
+    if (!acl.ok) {
+      rmSync(keyPath, { force: true });
+      io.err(`refusing: could not restrict the private key file permissions (${acl.detail}). The key file was removed.`);
+      return 1;
+    }
     mkdirSync(dirname(pubPath), { recursive: true });
     writeFileSync(pubPath, kp.publicKeyPem, { flag: "wx" });
     io.out(`private key (keep secret, never commit): ${keyPath}`);
     io.out(`public key: ${pubPath}`);
     io.out(`key id: ${kp.keyId}`);
+    io.out(`next: pin this key id in ${appPath(appDir, "trustAnchor")} as {"schemaVersion":1,"approverKeyId":"${kp.keyId}"}, review it in a commit, and record it out of band.`);
     return 0;
   }
 
@@ -120,6 +135,11 @@ export async function runCli(argv: string[], io: CliIo): Promise<number> {
   const keyId = pubPem === undefined ? null : publicKeyId(pubPem);
   if (pubPem === undefined || keyId === null) {
     io.err("approver public key is missing or invalid; run keygen first");
+    return 1;
+  }
+  const tc = checkTrustAnchors(keyId, readTrustAnchors(appDir, oob));
+  if (!tc.ok) {
+    io.err(`REFUSED: ${tc.failed}: ${tc.detail}`);
     return 1;
   }
   const prepared = prepareApp(appDir, keyId, at);

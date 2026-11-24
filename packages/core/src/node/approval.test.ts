@@ -10,7 +10,9 @@ import { appPath, prepareApp, verifyApp } from "./approval-files.js";
 import { canonicalDigest, generateApproverKey, signPayload, type ApprovalPayload } from "./signing.js";
 
 const PASS = "test-passphrase";
+const TRUST = { pinnedKeyId: undefined as string | undefined };
 const key = generateApproverKey(PASS);
+TRUST.pinnedKeyId = key.keyId;
 
 const pack = { schemaVersion: 1, rules: [{ id: "a", n: 1 }] };
 const lock = { files: { "x.json": "a".repeat(64) } };
@@ -52,13 +54,13 @@ function signed(i: ApprovalInputs): { record: unknown; payload: ApprovalPayload 
 describe("verifyApproval: tamper detection", () => {
   it("accepts untouched inputs", () => {
     const i = inputs();
-    expect(verifyApproval(i, signed(i).record, key.publicKeyPem)).toMatchObject({ ok: true });
+    expect(verifyApproval(i, signed(i).record, key.publicKeyPem, TRUST)).toMatchObject({ ok: true });
   });
 
   it("names pack-digest when the pack is modified", () => {
     const i = inputs();
     const { record } = signed(i);
-    const r = verifyApproval({ ...i, pack: { ...pack, extra: 1 } }, record, key.publicKeyPem);
+    const r = verifyApproval({ ...i, pack: { ...pack, extra: 1 } }, record, key.publicKeyPem, TRUST);
     expect(r).toMatchObject({ ok: false, failed: "pack-digest" });
   });
 
@@ -66,14 +68,14 @@ describe("verifyApproval: tamper detection", () => {
     const i = inputs();
     const { record } = signed(i);
     const tampered = { ...(i.gateReport as object), gates: [...report(dig(pack)).gates, { id: "extra", status: "pass" }] };
-    const r = verifyApproval({ ...i, gateReport: tampered }, record, key.publicKeyPem);
+    const r = verifyApproval({ ...i, gateReport: tampered }, record, key.publicKeyPem, TRUST);
     expect(r).toMatchObject({ ok: false, failed: "gate-digest" });
   });
 
   it("names gt-lock when the ground-truth lock is modified", () => {
     const i = inputs();
     const { record } = signed(i);
-    const r = verifyApproval({ ...i, groundTruthLock: { files: {} } }, record, key.publicKeyPem);
+    const r = verifyApproval({ ...i, groundTruthLock: { files: {} } }, record, key.publicKeyPem, TRUST);
     expect(r).toMatchObject({ ok: false, failed: "gt-lock" });
   });
 
@@ -82,7 +84,7 @@ describe("verifyApproval: tamper detection", () => {
     const { record } = signed(i) as { record: { signature: string } };
     const bytes = Buffer.from(record.signature, "base64");
     bytes[0] ^= 1;
-    const r = verifyApproval(i, { ...record, signature: bytes.toString("base64") }, key.publicKeyPem);
+    const r = verifyApproval(i, { ...record, signature: bytes.toString("base64") }, key.publicKeyPem, TRUST);
     expect(r).toMatchObject({ ok: false, failed: "signature" });
   });
 
@@ -95,7 +97,7 @@ describe("verifyApproval: tamper detection", () => {
       ...record,
       payload: { ...record.payload, packDigest: dig(newPack), gateReportDigest: dig(i.gateReport) },
     };
-    expect(verifyApproval(i, forged, key.publicKeyPem)).toMatchObject({ ok: false, failed: "signature" });
+    expect(verifyApproval(i, forged, key.publicKeyPem, TRUST)).toMatchObject({ ok: false, failed: "signature" });
   });
 });
 
@@ -115,7 +117,7 @@ describe("approval refused on failed, missing, and stale gates", () => {
 
     it(`verifyApproval refuses a record signed over a ${name}`, () => {
       const i = make();
-      const r = verifyApproval(i, signed(i).record, key.publicKeyPem);
+      const r = verifyApproval(i, signed(i).record, key.publicKeyPem, TRUST);
       expect(r).toMatchObject({ ok: false, failed: "gates" });
       if (!r.ok) expect(r.gateFailures?.some((f) => f.kind === kind)).toBe(true);
     });
@@ -143,6 +145,7 @@ describe("verifyApp (loader) on files in a temp dir", () => {
     write("gateReport", i.gateReport);
     write("lock", i.groundTruthLock);
     write("publicKey", key.publicKeyPem);
+    write("trustAnchor", { schemaVersion: 1, approverKeyId: key.keyId });
     write("record", signed(i).record);
   }
 
@@ -192,5 +195,85 @@ describe("verifyApp (loader) on files in a temp dir", () => {
   it("verifyApp refuses a record signed over a failing report on disk", () => {
     writeAll(inputs({ gateReport: report(dig(pack), "schema") }));
     expect(verifyApp(app)).toMatchObject({ ok: false, failed: "gates" });
+  });
+});
+
+describe("trust anchor (key substitution)", () => {
+  const attacker = generateApproverKey(PASS);
+  /** Attacker swaps the public key and re-signs everything consistently. */
+  function resigned(i: ApprovalInputs): unknown {
+    const payload: ApprovalPayload = {
+      packDigest: dig(i.pack),
+      gateReportDigest: dig(i.gateReport),
+      groundTruthLockDigest: dig(i.groundTruthLock),
+      approverKeyId: attacker.keyId,
+      approvedAt: "2025-01-04",
+    };
+    const s = signPayload(payload, attacker.privateKeyPem, PASS);
+    if (!s.ok) throw new Error("sign");
+    return { schemaVersion: 1, payload, signature: s.signature };
+  }
+  it("rejects a self-consistent substituted key with a valid re-sign (untrusted-key)", () => {
+    const i = inputs();
+    const r = verifyApproval(i, resigned(i), attacker.publicKeyPem, { pinnedKeyId: key.keyId });
+    expect(r).toMatchObject({ ok: false, failed: "untrusted-key" });
+  });
+  it("accepts the same attacker record when the anchor is the attacker key (anchor and key changed together)", () => {
+    const i = inputs();
+    expect(verifyApproval(i, resigned(i), attacker.publicKeyPem, { pinnedKeyId: attacker.keyId })).toMatchObject({ ok: true });
+  });
+  it("fails closed with no anchor configured", () => {
+    const i = inputs();
+    expect(verifyApproval(i, signed(i).record, key.publicKeyPem, {})).toMatchObject({ ok: false, failed: "no-trust-anchor" });
+  });
+  it("fails closed on a malformed anchor", () => {
+    const i = inputs();
+    expect(verifyApproval(i, signed(i).record, key.publicKeyPem, { pinnedKeyId: "nothex" })).toMatchObject({
+      ok: false,
+      failed: "no-trust-anchor",
+    });
+  });
+  it("passes with the correct pinned anchor, the correct out-of-band id, or both", () => {
+    const i = inputs();
+    const rec = signed(i).record;
+    expect(verifyApproval(i, rec, key.publicKeyPem, { pinnedKeyId: key.keyId })).toMatchObject({ ok: true });
+    expect(verifyApproval(i, rec, key.publicKeyPem, { outOfBandKeyId: key.keyId })).toMatchObject({ ok: true });
+    expect(verifyApproval(i, rec, key.publicKeyPem, { pinnedKeyId: key.keyId, outOfBandKeyId: key.keyId })).toMatchObject({ ok: true });
+  });
+  it("rejects when the out-of-band id disagrees with the repo anchor", () => {
+    const i = inputs();
+    const r = verifyApproval(i, signed(i).record, key.publicKeyPem, { pinnedKeyId: key.keyId, outOfBandKeyId: attacker.keyId });
+    expect(r).toMatchObject({ ok: false, failed: "untrusted-key" });
+  });
+  describe("verifyApp", () => {
+    let app: string;
+    beforeEach(() => {
+      app = mkdtempSync(join(tmpdir(), "changeling-trust-"));
+      const put = (k: Parameters<typeof appPath>[1], v: unknown): void => {
+        mkdirSync(dirname(appPath(app, k)), { recursive: true });
+        writeFileSync(appPath(app, k), typeof v === "string" ? v : JSON.stringify(v));
+      };
+      const i = inputs();
+      put("pack", i.pack);
+      put("gateReport", i.gateReport);
+      put("lock", i.groundTruthLock);
+      put("publicKey", attacker.publicKeyPem);
+      put("record", resigned(i));
+    });
+    afterEach(() => rmSync(app, { recursive: true, force: true }));
+    it("fails closed with no trust-anchor.json and no out-of-band id", () => {
+      expect(verifyApp(app)).toMatchObject({ ok: false, failed: "no-trust-anchor" });
+    });
+    it("rejects key substitution when trust-anchor.json pins the real key", () => {
+      writeFileSync(appPath(app, "trustAnchor"), JSON.stringify({ schemaVersion: 1, approverKeyId: key.keyId }));
+      expect(verifyApp(app)).toMatchObject({ ok: false, failed: "untrusted-key" });
+    });
+    it("rejects key substitution when only the out-of-band id is the real key", () => {
+      expect(verifyApp(app, key.keyId)).toMatchObject({ ok: false, failed: "untrusted-key" });
+    });
+    it("fails closed on an unparseable trust-anchor.json", () => {
+      writeFileSync(appPath(app, "trustAnchor"), "{");
+      expect(verifyApp(app)).toMatchObject({ ok: false, failed: "no-trust-anchor" });
+    });
   });
 });

@@ -4,6 +4,7 @@
 import { z } from "zod";
 import { isIsoDate } from "../dates.js";
 import { checkGateReport, REQUIRED_GATES, type GateCheckFailure } from "../gates.js";
+import { checkTrustAnchors, type TrustAnchors } from "../trust.js";
 import { canonicalDigest, publicKeyId, verifyPayload, type ApprovalPayload } from "./signing.js";
 
 const HEX64 = /^[0-9a-f]{64}$/;
@@ -35,7 +36,7 @@ export interface ApprovalInputs {
   groundTruthLock: unknown;
 }
 
-export type FailedCheck = "pack-digest" | "gate-digest" | "gt-lock" | "signature" | "key-id" | "gates" | "record";
+export type FailedCheck = "pack-digest" | "gate-digest" | "gt-lock" | "signature" | "key-id" | "no-trust-anchor" | "untrusted-key" | "gates" | "record";
 
 export type ApprovalFailure = {
   ok: false;
@@ -111,12 +112,16 @@ export function prepareApproval(
 /**
  * Loader check. Recomputes digests from the current files, applies the same gate check as
  * `approve`, and verifies the signature against the committed public key.
- * Order: record shape, key id, digests (pack, gate report, lock), signature, gates.
+ * The public key is trusted only if its key id equals the configured trust anchor(s); with no anchor
+ * the check fails closed. The stored gate report is checked as tamper evidence only. Gate
+ * recomputation belongs to `approve` (task 7.5).
+ * Order: record shape, trust anchor, key id, digests (pack, gate report, lock), signature, gates.
  */
 export function verifyApproval(
   inputs: ApprovalInputs,
   record: unknown,
   publicKeyPem: string | undefined,
+  trust: TrustAnchors,
   required: readonly string[] = REQUIRED_GATES,
 ): VerifyApprovalResult {
   const parsed = ApprovalRecordSchema.safeParse(record);
@@ -132,6 +137,8 @@ export function verifyApproval(
   if (publicKeyPem === undefined) return { ok: false, failed: "key-id", detail: "approver public key is missing" };
   const keyId = publicKeyId(publicKeyPem);
   if (keyId === null) return { ok: false, failed: "key-id", detail: "approver public key is not a valid key" };
+  const tc = checkTrustAnchors(keyId, trust);
+  if (!tc.ok) return tc;
   if (keyId !== rec.payload.approverKeyId) {
     return { ok: false, failed: "key-id", detail: "record was signed by a different key than the committed public key" };
   }

@@ -74,8 +74,28 @@ Findings from S2 that refine this:
 1. `pack.json` -> canonical bytes (sorted keys, integers only) -> SHA-256.
 2. Gate report and ground-truth lock are hashed the same way.
 3. The human runs `approve`, enters the key passphrase, and the CLI signs `{packDigest, gateReportDigest, groundTruthLockDigest, approverKeyId, approvedAt}`.
-4. The loader recomputes all three digests and verifies the signature against the committed public key. It returns `{ ok: false, failed: "pack-digest" | "gate-digest" | "gt-lock" | "signature" }` on any mismatch.
+4. The loader recomputes all three digests and verifies the signature against the committed public key, trusted only through the trust anchor (below). It returns `{ ok: false, failed: "pack-digest" | "gate-digest" | "gt-lock" | "signature" }` on any mismatch.
 
+## Trust anchor and threat model (R5.7)
+`verifyApproval` does not trust `approvals/approver.pub` by itself. It computes the key id (SHA-256 of the SPKI DER) and requires it to equal a trust anchor:
+- **Pinned anchor:** `apps/<app>/trust-anchor.json`, `{"schemaVersion":1,"approverKeyId":"<hex>"}`. It lives outside `approvals/` so that changing it is a visible, reviewable commit.
+- **Out-of-band anchor:** `--trust-key-id <hex>` or `CHANGELING_TRUSTED_KEY_ID` for the CLI, or an id embedded at web build time (`checkTrustAnchors` in `packages/core/src/trust.ts` is browser-safe). If both anchors exist, both must match.
+- No anchor, or a malformed one: `no-trust-anchor` (fail closed). Key id not equal to the anchor: `untrusted-key`. `approve` applies the same anchor check before signing.
+
+Detects: silent modification of pack, gate report, or lock; agent edits to files without the private key; replacing `approver.pub` and re-signing with another key without also changing the anchor; a mismatch between the repo anchor and an out-of-band id.
+Does not detect: a developer who controls both the key and the repository; an attacker who changes `approver.pub`, `trust-anchor.json`, and the record together in one commit that nobody reviews. The out-of-band id narrows that gap only if the verifier obtained it from somewhere the attacker does not control.
+
+## Key management (R5.4, R5.7)
+- One approver key for both apps (one human approver). Anchors are per app, so an app can rotate on its own.
+- Private key: encrypted PKCS#8 outside the repo (default `~/.changeling/approver.key`). `keygen` refuses a path inside a git repository. Back it up offline (encrypted copy on a separate medium) and keep the passphrase in a password manager, not in the same place.
+- Public key: `apps/<app>/approvals/approver.pub`. Anchor: `apps/<app>/trust-anchor.json`. `keygen` prints the key id for the human to pin.
+- Rotation or revocation: generate a new key, commit a new anchor (reviewed), and re-run `approve` for each app. Old records fail with `untrusted-key`, which is the intended revocation effect. Past records are not re-validated against the old key.
+
+## Private key protection
+Node exports the encrypted key as PBES2 with PBKDF2-HMAC-SHA256 at 2048 iterations and AES-256-CBC (measured, see `docs/spikes/s3.md`). The iteration count is low and Node cannot change it on export, so the passphrase carries the protection: `keygen` requires at least 16 characters. A scrypt-based wrapper is a possible later change. On Windows `mode: 0o600` has no effect, so `keygen` runs `icacls /inheritance:r` and grants only the current user SID, and removes the key file and refuses if that fails.
+
+## Gate recomputation (R5.5, R5.8)
+`verifyApproval` checks the stored gate report for digest match and pass status. That is tamper evidence, not proof the gates ran. The recomputation lives in `approve` (task 7.5): it runs the schema, citations, and ground-truth gates itself from the pack, snapshots, and attested ground truth, ignores any stored `gate-report.json`, and writes the report bound to the pack digest as an output.
 ## Ground truth flow
 - Human writes or confirms examples from official sources into `ground-truth/`, then runs `attest`, which writes `ground-truth.lock`.
 - Agents propose examples into `ground-truth-candidates/` only.

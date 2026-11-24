@@ -45,6 +45,8 @@ The spikes exist to answer five questions. Each has a go/no-go exit criterion an
 4. The approver private key SHALL be passphrase-protected and stored outside the repository.
 5. The approve command SHALL refuse to sign unless a gate report exists for the current pack digest and every required gate in it has passed. The loader SHALL apply the same check, so an approval record over a failing or stale gate report is rejected.
 6. Required gates SHALL be declared by the skeleton, not by the proposal. A missing gate counts as failed.
+7. The loader SHALL trust the approver public key only if its key id (SHA-256 of the SPKI DER) equals a trust anchor: a pinned key id in a trust file outside `approvals/`, an out-of-band key id supplied by the verifier, or both (then both must match). With no anchor configured the loader SHALL fail closed. A key id that does not match SHALL fail with `untrusted-key`.
+8. The `approve` command SHALL recompute every required gate itself from the pack, the source snapshots, and the attested ground truth. It SHALL NOT trust a stored gate report. The resulting gate report SHALL be bound to the pack digest.
 
 ### R6: Independent ground truth
 **User story:** As a maintainer, I want a source of truth that agent-written tests cannot silently alter.

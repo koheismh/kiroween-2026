@@ -9,3 +9,4 @@ export * from "./canonical.js";
 export * from "./gates.js";
 export * from "./webverify.js";
 export { isIsoDate, completedYears, throughMarch31After } from "./dates.js";
+export * from "./trust.js";

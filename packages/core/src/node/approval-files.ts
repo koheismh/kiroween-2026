@@ -3,10 +3,12 @@
 //   rules/pack.json                       the pack
 //   gate-report.json                      gate report for the current pack
 //   ground-truth/ground-truth.lock        lock written by `attest` (task 7.1)
+//   trust-anchor.json                     pinned approver key id (outside approvals/, reviewed in a commit)
 //   approvals/approver.pub                approver public key (PEM text)
 //   approvals/approval.json               signed approval record
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { isKeyId, type TrustAnchors } from "../trust.js";
 import {
   prepareApproval,
   verifyApproval,
@@ -19,6 +21,7 @@ export const APP_FILES = {
   pack: ["rules", "pack.json"],
   gateReport: ["gate-report.json"],
   lock: ["ground-truth", "ground-truth.lock"],
+  trustAnchor: ["trust-anchor.json"],
   publicKey: ["approvals", "approver.pub"],
   record: ["approvals", "approval.json"],
 } as const;
@@ -55,15 +58,29 @@ export function readPublicKey(appDir: string): string | undefined {
   return existsSync(p) ? readFileSync(p, "utf8") : undefined;
 }
 
+/**
+ * Read the pinned key id from `trust-anchor.json` ({"schemaVersion":1,"approverKeyId":"<hex>"}).
+ * A missing file gives no pinned id. A present but malformed file gives an invalid marker so the check fails closed.
+ */
+export function readTrustAnchors(appDir: string, outOfBandKeyId?: string): TrustAnchors {
+  const r = readJson(appPath(appDir, "trustAnchor"));
+  let pinned: string | undefined;
+  if (r.ok) {
+    const v = r.value as { schemaVersion?: unknown; approverKeyId?: unknown } | null;
+    pinned = v?.schemaVersion === 1 && isKeyId(v.approverKeyId) ? v.approverKeyId : "invalid";
+  } else if (r.reason === "unparseable") pinned = "invalid";
+  return { pinnedKeyId: pinned, outOfBandKeyId };
+}
+
 /** Shared loader check for an app directory. Used by the `verify` CLI. */
-export function verifyApp(appDir: string): VerifyApprovalResult {
+export function verifyApp(appDir: string, outOfBandKeyId?: string): VerifyApprovalResult {
   const { inputs, unparseable } = readApprovalInputs(appDir);
   if (unparseable.length > 0) {
     return { ok: false, failed: "record", detail: `unparseable JSON: ${unparseable.join(", ")}` };
   }
   const rec = readJson(appPath(appDir, "record"));
   if (!rec.ok) return { ok: false, failed: "record", detail: `approval record is ${rec.reason}` };
-  return verifyApproval(inputs, rec.value, readPublicKey(appDir));
+  return verifyApproval(inputs, rec.value, readPublicKey(appDir), readTrustAnchors(appDir, outOfBandKeyId));
 }
 
 /** Pre-sign check for `approve`: same digests and gate check as the loader. */
