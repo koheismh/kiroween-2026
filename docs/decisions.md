@@ -33,3 +33,8 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Boundary cases the sources do not settle (April 1 births, twins, age-3 boundary month) are excluded by scope or listed as unverified. They are not guessed.
 - Weakness to disclose: nested JSON rules are hard to read in review and needed a generator script.
 
+
+## 2026-11-24: S1 hardening
+- Snapshot loading no longer trusts `meta.json` or `extracted.txt`: hash is recomputed, text is re-derived with a shared extractor. See docs/spikes/s1.md entry 2.
+- Inputs that a rule would otherwise ignore silently (birth date after the period) are rejected by scope with `DATE_AFTER_PERIOD`.
+

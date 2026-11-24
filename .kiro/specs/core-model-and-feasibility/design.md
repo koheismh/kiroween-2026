@@ -1,4 +1,4 @@
-﻿# Design: Core Model and Feasibility Spikes
+# Design: Core Model and Feasibility Spikes
 
 ## Decisions and trade-offs
 
@@ -52,7 +52,7 @@ type EvalResult =
 - Dates: `ageOn` (modes `completedYears` and `throughMarch31After`), `period` (the evaluation period, added in S1)
 - Lists: `sumOver`, `countWhere` (for per-child sums and child order)
 
-S1 added one operator (`period`). Needing more than three triggers the fallback. Scope declarations gained `period` range, fact `default`, `excludeMonthDays`, `uniqueBy`, and `assumptions`.
+S1 added one operator (`period`). Date facts can set `notAfterPeriod` so a birth date after the evaluation period is unsupported instead of silently ignored. Needing more than three triggers the fallback. Scope declarations gained `period` range, fact `default`, `excludeMonthDays`, `uniqueBy`, and `assumptions`.
 
 ## Temporal example (US)
 ```
@@ -81,6 +81,11 @@ Findings from S2 that refine this:
 - Agents propose examples into `ground-truth-candidates/` only.
 - Hooks (created in task 7.2) ask for confirmation on agent writes to `ground-truth/**` and `approvals/**`. Hooks are a guard rail. The digest lock is the enforcement.
 - Where a second independent oracle exists (for example IRS tax tables), prefer it. S2 records which are available.
+
+## Source trust chain
+A citation is checked in this order: the rule pack cites a SHA-256, the loader recomputes the hash of `original.bin`, the text is re-derived from those bytes with the shared extractor (`packages/core/src/extract.ts`, also used by `scripts/snapshot.mjs`), and the quote is searched in that derived text. `meta.json` and `extracted.txt` are only compared against the derived values, never used as input. The pack digest that approval signs (task 6) covers the cited hash, so the chain ends at a signed value.
+
+Limit: this detects edits to stored snapshot files. It does not prove the original bytes match what the publisher served. That needs a second retrieval.
 
 ## Spike notes
 - **S1** builds the real `core/model` and `core/evaluator` first, then encodes four rule sets. The US sets go first because the source is English and the structure is simple. The JP set is the real expressiveness test: age range through the end of the fiscal year, amounts by child order, counting of supported children, income cap removal, and payment schedule.

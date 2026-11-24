@@ -112,6 +112,13 @@
   ],
   "unsupported": [
     {
+      "id": "jp-u7-born-after-period",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 1, "children": [{ "birthDate": "2024-10-02" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expectedCodes": ["DATE_AFTER_PERIOD"]
+    },
+    {
       "id": "jp-u1-twins",
       "facts": { "recipientIncomeYen": 3000000, "dependents": 2, "children": [{ "birthDate": "2020-05-05" }, { "birthDate": "2020-05-05" }] },
       "period": "2024-10-01",

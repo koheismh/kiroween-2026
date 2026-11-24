@@ -59,6 +59,7 @@ const DateFact = z
     min: isoDate.optional(),
     max: isoDate.optional(),
     excludeMonthDays: z.array(z.string().regex(/^\d{2}-\d{2}$/)).optional(),
+    notAfterPeriod: z.boolean().optional(),
     ...common,
   })
   .strict();

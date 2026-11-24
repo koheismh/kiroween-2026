@@ -195,3 +195,31 @@ describe("evaluate", () => {
     expect(dup.kind === "unsupported" && dup.reasons.map((x) => x.code)).toContain("DUPLICATE_ITEM");
   });
 });
+
+describe("date facts that must not be after the period", () => {
+  const p = must(
+    pack(
+      [v("n", "1", { op: "countWhere", list: "kids", as: "k", where: { op: "lte", left: { op: "fact", path: "$k.born" }, right: { op: "period" } } })],
+      { kids: { type: "array", maxItems: 3, item: { born: { type: "date", notAfterPeriod: true } } } },
+    ),
+  );
+  const run = (born: string) =>
+    evaluate(p, { facts: { kids: [{ born }] }, period: "2025-06-01", knowledgeDate: "2025-06-01", outputs: ["n"] });
+  it("rejects a date after the period with a stable code and path", () => {
+    const r = run("2025-06-02");
+    expect(r.kind).toBe("unsupported");
+    expect(r).not.toHaveProperty("values");
+    expect(r.kind === "unsupported" && r.reasons).toEqual([
+      { code: "DATE_AFTER_PERIOD", path: "kids[0].born", message: "must not be after the evaluation period 2025-06-01" },
+    ]);
+  });
+  it("accepts a date on or before the period", () => {
+    expect(run("2025-06-01").kind).toBe("ok");
+    expect(run("2020-01-01").kind).toBe("ok");
+  });
+  it("does not apply when the spec does not ask for it", () => {
+    const q = must(pack([v("n", "1", { op: "lit", value: 1 })], { kids: { type: "array", maxItems: 3, item: { born: { type: "date" } } } }));
+    const r = evaluate(q, { facts: { kids: [{ born: "2030-01-01" }] }, period: "2025-06-01", knowledgeDate: "2025-06-01", outputs: ["n"] });
+    expect(r.kind).toBe("ok");
+  });
+});

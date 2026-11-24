@@ -137,8 +137,8 @@ const write = (path, obj) => {
   const post = snap(dir, "jp-cfa-mottoouen-20240731");
 
   const birth = fact("$child.birthDate");
-  const eligiblePre = and(lte(birth, period), through(birth, 15));
-  const eligiblePost = and(lte(birth, period), through(birth, 18));
+  const eligiblePre = through(birth, 15);
+  const eligiblePost = through(birth, 18);
 
   /** 1 + number of counted children strictly older than $child. */
   const order = (countedOther) => add(lit(1), {
@@ -147,11 +147,8 @@ const write = (path, obj) => {
     as: "other",
     where: and(lt(fact("$other.birthDate"), birth), countedOther),
   });
-  const countedPre = and(lte(fact("$other.birthDate"), period), through(fact("$other.birthDate"), 18));
-  const countedPost = and(
-    lte(fact("$other.birthDate"), period),
-    or(through(fact("$other.birthDate"), 18), and(through(fact("$other.birthDate"), 22), fact("$other.supported"))),
-  );
+  const countedPre = through(fact("$other.birthDate"), 18);
+  const countedPost = or(through(fact("$other.birthDate"), 18), and(through(fact("$other.birthDate"), 22), fact("$other.supported")));
 
   const income = fact("recipientIncomeYen");
   const amountPre = iff(
@@ -194,7 +191,7 @@ const write = (path, obj) => {
           maxItems: 6,
           uniqueBy: "birthDate",
           item: {
-            birthDate: { type: "date", min: "1995-01-01", excludeMonthDays: ["04-01"] },
+            birthDate: { type: "date", min: "1995-01-01", excludeMonthDays: ["04-01"], notAfterPeriod: true },
             supported: { type: "boolean", default: false },
           },
         },
@@ -204,6 +201,7 @@ const write = (path, obj) => {
         "Age is measured on the first day of that month. Boundary months for the age-3 step are not verified.",
         "Children born on April 1 are unsupported (the legal day of attaining an age differs by one day).",
         "Children with the same birth date (twins) are unsupported (order is ambiguous).",
+        "Children born after the evaluation period are unsupported.",
         "Income is the recipient's income figure as used in the official limit table, in yen. Dependents 0 to 5 only.",
         "Facility residents, overseas residents, and public servants are out of scope.",
         "Demonstration estimate. Not official advice.",

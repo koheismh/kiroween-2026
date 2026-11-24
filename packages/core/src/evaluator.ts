@@ -61,7 +61,7 @@ type Obj = Record<string, unknown>;
 
 // ---- scope check -------------------------------------------------------------
 
-function checkScalar(spec: ScalarFactSpec, v: unknown, path: string, out: Reason[]): boolean {
+function checkScalar(spec: ScalarFactSpec, v: unknown, path: string, period: string, out: Reason[]): boolean {
   const bad = (code: string, message: string) => {
     out.push({ code, path, message });
     return false;
@@ -86,6 +86,7 @@ function checkScalar(spec: ScalarFactSpec, v: unknown, path: string, out: Reason
       if (spec.min !== undefined && v < spec.min) return bad("FACT_OUT_OF_SCOPE", `must be on or after ${spec.min}`);
       if (spec.max !== undefined && v > spec.max) return bad("FACT_OUT_OF_SCOPE", `must be on or before ${spec.max}`);
       if (spec.excludeMonthDays?.includes(monthDay(v))) return bad("FACT_OUT_OF_SCOPE", `dates on ${monthDay(v)} are not supported`);
+      if (spec.notAfterPeriod && isIsoDate(period) && v > period) return bad("DATE_AFTER_PERIOD", `must not be after the evaluation period ${period}`);
       return true;
   }
 }
@@ -118,7 +119,7 @@ export function normalizeFacts(pack: RulePack, facts: Obj, period: string): { fa
       } else continue;
     }
     if (fs.type !== "array") {
-      if (checkScalar(fs, v, key, reasons)) out[key] = v;
+      if (checkScalar(fs, v, key, period, reasons)) out[key] = v;
       continue;
     }
     if (!Array.isArray(v)) {
@@ -147,7 +148,7 @@ export function normalizeFacts(pack: RulePack, facts: Obj, period: string): { fa
             continue;
           } else continue;
         }
-        if (checkScalar(ispec, iv, `${base}.${ik}`, reasons)) item[ik] = iv;
+        if (checkScalar(ispec, iv, `${base}.${ik}`, period, reasons)) item[ik] = iv;
       }
       items.push(item);
     });

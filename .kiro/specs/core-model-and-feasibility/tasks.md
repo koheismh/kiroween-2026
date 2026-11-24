@@ -1,4 +1,4 @@
-﻿# Tasks: Core Model and Feasibility Spikes
+# Tasks: Core Model and Feasibility Spikes
 
 Time boxes are hard limits. At the limit, stop, record the result in `docs/spikes/<id>.md`, and report GO, GO-WITH-FALLBACK, or NO-GO. Do not extend a box without approval. Commit and push after each numbered task (see git-workflow steering).
 
@@ -45,7 +45,10 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
   - [x] 5.5 Encode US 2025 original and revised rules (standard deduction and brackets, single filer). Money in integer cents. Decide `knownFrom` for the original: IRB issue date 2024-11-04 or the 2024-10-22 date in the text, and record it.
   - [x] 5.6 Encode JP pre- and post-reform rules for the supported scope from the 2023-12-04 and 2024-07-31 snapshots. Record `knownFrom` as a snapshot-date upper bound unless the law text is checked.
   - [x] 5.7 `docs/spikes/s1.md` with operators added, fallbacks used, and the verdict
-  - _Requirements: R1, R2, R3, R4, R7, R8_
+  - [x] 5.8 S1 hardening from review (2026-11-24)
+    - [x] 5.8.1 Loader recomputes SHA-256 from `original.bin` and re-derives the text with a shared extractor; stored metadata and text are only compared. `scripts/snapshot.mjs` uses the same extractor. _Requirements: R7.2, R7.4_
+    - [x] 5.8.2 Reject dates after the evaluation period via `notAfterPeriod` (code `DATE_AFTER_PERIOD`). JP birth dates use it. Redundant rule guards removed and the JP pack regenerated. _Requirements: R4.3_
+    - [x] 5.8.3 Regression tests: tampered text, tampered bytes, forged metadata, missing file, fully rewritten snapshot, fake quote in `extracted.txt`, and a birth date after the period (unit test plus candidate `jp-u7`). _Requirements: R4.3, R7.2, R7.4_  - _Requirements: R1, R2, R3, R4, R7, R8_
 
 - [ ] 6. S3: Approval integrity (box: 2 h) - not started
   - [ ] 6.1 Canonical JSON, digests, Ed25519 sign and verify with `node:crypto`

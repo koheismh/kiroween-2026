@@ -1,4 +1,4 @@
-﻿# Requirements: Core Model and Feasibility Spikes
+# Requirements: Core Model and Feasibility Spikes
 
 ## Introduction
 This spec covers the first two days of work. It defines the minimum core model of the Changeling Kit skeleton and five time-boxed spikes that decide whether the architecture is feasible. No production features (UI, full workflow, impact report) are in scope.
@@ -34,6 +34,7 @@ The spikes exist to answer five questions. Each has a go/no-go exit criterion an
 
 1. WHEN a fact is missing, invalid, or outside the declared supported scope, evaluation SHALL return `{ kind: "unsupported", reasons: [...] }` with a stable reason code and the offending fact path.
 2. Evaluation SHALL NOT return a numeric result alongside an unsupported reason.
+3. WHEN a date fact declared `notAfterPeriod` is later than the evaluation period (for example a child born after the period), evaluation SHALL return `unsupported` with code `DATE_AFTER_PERIOD` and the fact path. A rule SHALL NOT silently ignore such a fact.
 
 ### R5: Approval integrity
 **User story:** As a maintainer, I want modified rule packs to lose their approval automatically so that nothing unreviewed reaches users.
@@ -57,8 +58,9 @@ The spikes exist to answer five questions. Each has a go/no-go exit criterion an
 **User story:** As a reviewer, I want each cited quote tied to an exact snapshot so that I can verify it.
 
 1. A snapshot SHALL store original bytes, extracted text, retrieval timestamp, URL, and SHA-256.
-2. The citation check SHALL pass only when the quote exists in the snapshot's extracted text after Unicode NFKC normalization and whitespace collapsing, and the cited hash matches.
+2. The citation check SHALL pass only when the quote exists in the snapshot's text after Unicode NFKC normalization and whitespace collapsing, and the cited hash equals the SHA-256 recomputed from the original bytes.
 3. The check SHALL work for Japanese and English text.
+4. The loader SHALL NOT trust stored metadata or stored extracted text. It SHALL recompute the SHA-256 from the original bytes, re-derive the text from them with the shared extractor, and return a typed failure (`MISSING_FILE`, `META_ID_MISMATCH`, `META_HASH_MISMATCH`, `NOT_EXTRACTABLE`, `EXTRACTED_TEXT_MISMATCH`) when stored values disagree.
 
 ### R8: Feasibility spikes with go/no-go
 **User story:** As the developer, I want each risky assumption tested early so that I can change the plan within two days.
