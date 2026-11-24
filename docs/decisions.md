@@ -20,3 +20,9 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Integrity is still carried by gates and signed approval, not by the reviewer.
 - Added steering `records.md`: significant failures, findings, design changes, and verification results are recorded concisely and committed at checkpoints.
 
+
+## 2026-11-24: Checkpoint 1 closed
+- Decision: continue as planned. S2 GO (sources approved by the developer). S4 GO (Crew reviewer verified through Crew). No fallbacks applied.
+- Design addition (from the Crew review): rule versions carry `knownFromBasis` (`enactment`, `publication`, `snapshot-upper-bound`). Added to the S1 schema.
+- Crew remains outside the runtime; its reviews are advice, not gates.
+

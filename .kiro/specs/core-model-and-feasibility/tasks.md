@@ -4,7 +4,7 @@ Time boxes are hard limits. At the limit, stop, record the result in `docs/spike
 
 Order: scaffold, then source availability (S2) and Crew feasibility (S4), then the evaluator (S1). The evaluator is not built until S2 and S4 report and the developer decides at Checkpoint 1.
 
-Status as of 2026-11-24 (JST): tasks 1 and 2 done, task 3 waiting on human steps, Checkpoint 1 open. Last pushed commit: `2099fd2`.
+Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue as planned). Task 5 (S1) is in progress.
 
 - [x] 1. Scaffold workspace (box: 45 min)
   - [x] 1.1 npm workspace with `packages/core`, TypeScript strict, Vitest, and a `.gitignore` that keeps `.kiro/` tracked and ignores keys and env files
@@ -19,25 +19,25 @@ Status as of 2026-11-24 (JST): tasks 1 and 2 done, task 3 waiting on human steps
   - [x] 2.3 JP "before" source identified (Wayback capture of the CFA "児童手当制度のご案内" page). Second-source oracles listed as candidates only: the two CFA PDFs and the IRS Form 1040 instructions. None fetched or attested.
   - [x] 2.4 Write `docs/spikes/s2.md` with the verdict
   - [x] 2.5 Check licensing: CFA content is under Public Data License 1.0 with attribution. IRS licence statement not verified.
-  - [ ] 2.6 **Human:** confirm the five snapshots are the intended documents
+  - [x] 2.6 **Human:** confirm the five snapshots are the intended documents (approved 2026-11-24)
   - _Requirements: R7 (availability only), R8_
 
-- [ ] 3. S4: Crew feasibility (box: 90 min) - installed, not yet run; see `docs/spikes/s4.md`
+- [x] 3. S4: Crew feasibility (box: 90 min) - GO, see `docs/spikes/s4.md`
   - [x] 3.1 Read the Crew App Kit docs and the locally installed Crew version
   - [x] 3.2 Create a minimal reviewer app (agent `rule-change-reviewer`, skill `rule-change-review`, sample proposal and gate report) in a separate local repository `changeling-crew`. One local commit (`2e291ec`), no remote.
   - [x] 3.3 Install it from a local path with `kirocrew app install` (succeeded)
   - [x] 3.4 Write `docs/spikes/s4.md` with the verdict and the exact install steps
-  - [ ] 3.5 **Human:** trust `changeling-crew` in Crew Settings (Security, Third-party apps) and start the gateway. Enable was refused until then.
-  - [ ] 3.6 Run the reviewer on `examples/sample-proposal/`. Expected: `review.md` with the fixed headings and `DO NOT APPROVE`. Record the outcome in `docs/spikes/s4.md`.
-  - [ ] 3.7 **Human:** create an empty public GitHub repository for the Crew app (the GitHub CLI is not installed), add it as `origin`, and push
+  - [x] 3.5 **Human:** trust `changeling-crew` in Crew Settings (Security, Third-party apps) and start the gateway. Enable was refused until then.
+  - [x] 3.6 Run the reviewer on `examples/sample-proposal/`. Expected: `review.md` with the fixed headings and `DO NOT APPROVE`. Record the outcome in `docs/spikes/s4.md`.
+  - [x] 3.7 **Human:** create the GitHub repository for the Crew app (done: `koheismh/changeling-crew`; fixes pushed)
   - _Requirements: R8_
 
-- [ ] 4. Checkpoint 1 (box: 15 min) - open
+- [x] 4. Checkpoint 1 (box: 15 min) - closed 2026-11-24
   - [x] 4.1 Push all results (done: `2099fd2` on `main`; the Crew repo is not pushed, see 3.7)
-  - [ ] 4.2 **Human:** review the S2 and S4 verdicts
-  - [ ] 4.3 Decide: continue, apply fallbacks (for S4: plain Kiro agent plus hooks, Crew as bonus only), or change scope. Update this plan.
+  - [x] 4.2 **Human:** review the S2 and S4 verdicts
+  - [x] 4.3 Decision: continue as planned, no fallbacks. Decide: continue, apply fallbacks (for S4: plain Kiro agent plus hooks, Crew as bonus only), or change scope. Update this plan.
 
-- [ ] 5. S1: Expression model and temporal resolution (box: 4 h) - not started
+- [ ] 5. S1: Expression model and temporal resolution (box: 4 h) - in progress
   - [ ] 5.1 Zod schema, validation (cycles, overlaps, integer-only), and the initial operator set in `packages/core`
   - [ ] 5.2 Evaluator with trace, rounding modes, and unsupported results
   - [ ] 5.3 Temporal resolver, tested with the US dual-date example
