@@ -1,0 +1,176 @@
+{
+  "appId": "us-tax-estimator",
+  "schemaVersion": 1,
+  "scope": {
+    "period": {
+      "min": "2025-01-01",
+      "max": "2025-12-31"
+    },
+    "facts": {
+      "wagesCents": {
+        "type": "integer",
+        "min": 0,
+        "max": 100000000000
+      },
+      "filingStatus": {
+        "type": "string",
+        "values": [
+          "single"
+        ]
+      },
+      "age65OrOlder": {
+        "type": "boolean",
+        "values": [
+          false
+        ]
+      },
+      "blind": {
+        "type": "boolean",
+        "values": [
+          false
+        ]
+      },
+      "claimedAsDependent": {
+        "type": "boolean",
+        "values": [
+          false
+        ]
+      }
+    },
+    "assumptions": [
+      "Federal income tax only, tax year 2025.",
+      "Single filer who takes the standard deduction.",
+      "Wages are the only income. No credits, adjustments, or other taxes.",
+      "Estimate for demonstration. Not tax advice."
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "standardDeductionCents",
+      "versionId": "2025-original",
+      "appliesFrom": "2025-01-01",
+      "appliesTo": "2025-12-31",
+      "knownFrom": "2024-11-04",
+      "knownFromBasis": "publication",
+      "citations": [
+        {
+          "sourceId": "us-irb-2024-45",
+          "snapshotSha256": "cef28b208f698990d7d437709b203c20070d1a84c20fc9e67a2f2a741bd97320",
+          "quote": "(1) In general . For taxable years beginning in 2025, the standard deduction amounts under § 63(c)(2) are as follows:"
+        },
+        {
+          "sourceId": "us-irb-2024-45",
+          "snapshotSha256": "cef28b208f698990d7d437709b203c20070d1a84c20fc9e67a2f2a741bd97320",
+          "quote": "Unmarried Individuals (other than Surviving Spouses and Heads of Households) (§ 1(j)(2)(C)) $15,000"
+        }
+      ],
+      "expr": {
+        "op": "lit",
+        "value": 1500000
+      }
+    },
+    {
+      "ruleId": "standardDeductionCents",
+      "versionId": "2025-revised",
+      "appliesFrom": "2025-01-01",
+      "appliesTo": "2025-12-31",
+      "knownFrom": "2025-07-04",
+      "knownFromBasis": "enactment",
+      "citations": [
+        {
+          "sourceId": "us-irb-2025-45",
+          "snapshotSha256": "990554f1113fcf41f9be878868cd8e9c2b9f14ae9c75e721c055568a9c703517",
+          "quote": "Section 63(c)(7) as amended by the OBBBA provides the standard deduction amounts under § 63(c)(2) for any taxable year beginning in 2025 as follows:"
+        },
+        {
+          "sourceId": "us-irb-2025-45",
+          "snapshotSha256": "990554f1113fcf41f9be878868cd8e9c2b9f14ae9c75e721c055568a9c703517",
+          "quote": "Unmarried Individuals (other than Surviving Spouses and Heads of Households) (§ 1(j)(2)(C)) $15,750"
+        },
+        {
+          "sourceId": "us-irb-2025-45",
+          "snapshotSha256": "990554f1113fcf41f9be878868cd8e9c2b9f14ae9c75e721c055568a9c703517",
+          "quote": "The OBBBA was signed into law on July 4, 2025."
+        }
+      ],
+      "expr": {
+        "op": "lit",
+        "value": 1575000
+      }
+    },
+    {
+      "ruleId": "incomeTaxCents",
+      "versionId": "2025",
+      "appliesFrom": "2025-01-01",
+      "appliesTo": "2025-12-31",
+      "knownFrom": "2024-11-04",
+      "knownFromBasis": "publication",
+      "citations": [
+        {
+          "sourceId": "us-irb-2024-45",
+          "snapshotSha256": "cef28b208f698990d7d437709b203c20070d1a84c20fc9e67a2f2a741bd97320",
+          "quote": ".01 Tax Rate Tables . For taxable years beginning in 2025, the tax rate tables under § 1 are as follows:"
+        },
+        {
+          "sourceId": "us-irb-2024-45",
+          "snapshotSha256": "cef28b208f698990d7d437709b203c20070d1a84c20fc9e67a2f2a741bd97320",
+          "quote": "TABLE 3 - Section 1(j)(2)(C) – Unmarried Individuals (other than Surviving Spouses and Heads of Households) If Taxable Income Is : The Tax Is : Not over $11,925 10% of the taxable income Over $11,925 but not over $48,475 $1,192.50 plus 12% of the excess over $11,925 Over $48,475 but not over $103,350 $5,578.50 plus 22% of the excess over $48,475 Over $103,350 but not over $197,300 $17,651 plus 24% of the excess over $103,350 Over $197,300 but not over $250,525 $40,199 plus 32% of the excess over $197,300 Over $250,525 but not over $626,350 $57,231 plus 35% of the excess over $250,525 Over $626,350 $188,769.75 plus 37% of the excess over $626,350"
+        }
+      ],
+      "expr": {
+        "op": "bands",
+        "round": "halfUp",
+        "input": {
+          "op": "max",
+          "args": [
+            {
+              "op": "lit",
+              "value": 0
+            },
+            {
+              "op": "sub",
+              "left": {
+                "op": "fact",
+                "path": "wagesCents"
+              },
+              "right": {
+                "op": "ref",
+                "rule": "standardDeductionCents"
+              }
+            }
+          ]
+        },
+        "bands": [
+          {
+            "upTo": 1192500,
+            "bps": 1000
+          },
+          {
+            "upTo": 4847500,
+            "bps": 1200
+          },
+          {
+            "upTo": 10335000,
+            "bps": 2200
+          },
+          {
+            "upTo": 19730000,
+            "bps": 2400
+          },
+          {
+            "upTo": 25052500,
+            "bps": 3200
+          },
+          {
+            "upTo": 62635000,
+            "bps": 3500
+          },
+          {
+            "upTo": null,
+            "bps": 3700
+          }
+        ]
+      }
+    }
+  ]
+}

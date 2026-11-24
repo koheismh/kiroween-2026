@@ -1,4 +1,4 @@
-# Requirements: Core Model and Feasibility Spikes
+﻿# Requirements: Core Model and Feasibility Spikes
 
 ## Introduction
 This spec covers the first two days of work. It defines the minimum core model of the Changeling Kit skeleton and five time-boxed spikes that decide whether the architecture is feasible. No production features (UI, full workflow, impact report) are in scope.
@@ -11,7 +11,7 @@ The spikes exist to answer five questions. Each has a go/no-go exit criterion an
 **User story:** As a developer, I want a validated, versioned rule pack format so that rule changes are explicit, reviewable data.
 
 1. A rule pack SHALL declare `appId`, `schemaVersion`, a supported-scope declaration, and a list of rule versions.
-2. Each rule version SHALL have `ruleId`, `versionId`, `appliesFrom`, optional `appliesTo`, `knownFrom`, at least one citation, and an expression.
+2. Each rule version SHALL have `ruleId`, `versionId`, `appliesFrom`, optional `appliesTo`, `knownFrom`, `knownFromBasis` (`enactment`, `publication`, or `snapshot-upper-bound`), at least one citation, and an expression.
 3. A citation SHALL contain `sourceId`, `snapshotSha256`, and a verbatim `quote`.
 4. The schema SHALL reject non-integer numbers, unknown operators, reference cycles between rules, and two versions of one rule with the same `knownFrom` and overlapping periods.
 

@@ -1,0 +1,157 @@
+{
+  "note": "Agent-suggested examples derived from the cited sources. NOT attested ground truth. No gate uses them. A human must verify each one against the official source and move it to ground-truth/ via the attest command (task 7.3). Amounts are monthly yen for the household. Boundary months for the age-3 step are not covered.",
+  "examples": [
+    {
+      "id": "jp-1-pre-under3",
+      "description": "Before the reform: one child aged 2",
+      "source": "jp-cfa-annai-20231204, section 2 (3歳未満 一律15,000円)",
+      "facts": { "recipientIncomeYen": 5000000, "dependents": 2, "children": [{ "birthDate": "2022-05-10" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 15000, "paymentsPerYear": 3 }
+    },
+    {
+      "id": "jp-2-pre-primary",
+      "description": "Before the reform: one child aged 4",
+      "source": "jp-cfa-annai-20231204, section 2 (3歳以上 小学校修了前 10,000円)",
+      "facts": { "recipientIncomeYen": 4000000, "dependents": 1, "children": [{ "birthDate": "2019-08-20" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 10000 }
+    },
+    {
+      "id": "jp-3-pre-third-child",
+      "description": "Before the reform: three children aged 10, 7, 6; third child gets 15,000",
+      "source": "jp-cfa-annai-20231204, section 2 (第3子以降は15,000円)",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 3, "children": [{ "birthDate": "2014-05-05" }, { "birthDate": "2016-07-07" }, { "birthDate": "2018-02-02" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 35000 }
+    },
+    {
+      "id": "jp-4-pre-special-benefit",
+      "description": "Before the reform: income between the limit (6.60M) and the cap (8.96M) for 1 dependent",
+      "source": "jp-cfa-annai-20231204, income table and 特例給付 5,000円",
+      "facts": { "recipientIncomeYen": 7000000, "dependents": 1, "children": [{ "birthDate": "2019-08-20" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 5000 }
+    },
+    {
+      "id": "jp-5-pre-over-cap",
+      "description": "Before the reform: income at or above the cap gets nothing",
+      "source": "jp-cfa-annai-20231204, income table and 令和4年10月支給分から",
+      "facts": { "recipientIncomeYen": 9000000, "dependents": 1, "children": [{ "birthDate": "2019-08-20" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 0 }
+    },
+    {
+      "id": "jp-6-pre-too-old",
+      "description": "Before the reform: child past the first March 31 after the 15th birthday",
+      "source": "jp-cfa-annai-20231204, section 1 (中学校卒業まで)",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 1, "children": [{ "birthDate": "2008-06-06" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 0 }
+    },
+    {
+      "id": "jp-7-post-high-school",
+      "description": "After the reform: a 17-year-old is now eligible",
+      "source": "jp-cfa-mottoouen-20240731, section 1 (18歳に達する日以後の最初の3月31日まで)",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 1, "children": [{ "birthDate": "2007-09-09" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expected": { "monthlyAllowanceYen": 10000, "paymentsPerYear": 6 }
+    },
+    {
+      "id": "jp-8-post-third-child",
+      "description": "After the reform: the same three children as jp-3; third child gets 30,000",
+      "source": "jp-cfa-mottoouen-20240731, section 3 (第3子以降は30,000円)",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 3, "children": [{ "birthDate": "2014-05-05" }, { "birthDate": "2016-07-07" }, { "birthDate": "2018-02-02" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expected": { "monthlyAllowanceYen": 50000 }
+    },
+    {
+      "id": "jp-9-post-no-income-test",
+      "description": "After the reform: income that got nothing before is now paid",
+      "source": "jp-cfa-mottoouen-20240731, section 2 (所得上限限度額を超過し ... 申請が必要)",
+      "facts": { "recipientIncomeYen": 9000000, "dependents": 1, "children": [{ "birthDate": "2023-03-03" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expected": { "monthlyAllowanceYen": 15000 }
+    },
+    {
+      "id": "jp-10-post-supported-sibling",
+      "description": "After the reform: a supported 20-year-old sibling counts toward the third child",
+      "source": "jp-cfa-mottoouen-20240731, section 2 and 3 (児童の兄姉等, 22歳)",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 3, "children": [{ "birthDate": "2003-10-10", "supported": true }, { "birthDate": "2010-05-05" }, { "birthDate": "2012-08-08" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expected": { "monthlyAllowanceYen": 40000 }
+    },
+    {
+      "id": "jp-11-post-unsupported-sibling-not-counted",
+      "description": "After the reform: the same sibling not supported is not counted",
+      "source": "jp-cfa-mottoouen-20240731, section 2 (親等に経済的負担のある子)",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 3, "children": [{ "birthDate": "2003-10-10", "supported": false }, { "birthDate": "2010-05-05" }, { "birthDate": "2012-08-08" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expected": { "monthlyAllowanceYen": 20000 }
+    },
+    {
+      "id": "jp-12-replay-before-reform-known",
+      "description": "Historical replay: October 2024 estimated with knowledge from 2024-06-30 uses the old rules",
+      "source": "temporal model: the reform page was first captured on 2024-07-31",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 3, "children": [{ "birthDate": "2014-05-05" }, { "birthDate": "2016-07-07" }, { "birthDate": "2018-02-02" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-06-30",
+      "expected": { "monthlyAllowanceYen": 35000, "paymentsPerYear": 3 }
+    }
+  ],
+  "unsupported": [
+    {
+      "id": "jp-u1-twins",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 2, "children": [{ "birthDate": "2020-05-05" }, { "birthDate": "2020-05-05" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expectedCodes": ["DUPLICATE_ITEM"]
+    },
+    {
+      "id": "jp-u2-april-first",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 1, "children": [{ "birthDate": "2010-04-01" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expectedCodes": ["FACT_OUT_OF_SCOPE"]
+    },
+    {
+      "id": "jp-u3-seven-children",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 5, "children": [{ "birthDate": "2010-05-05" }, { "birthDate": "2011-05-05" }, { "birthDate": "2012-05-05" }, { "birthDate": "2013-05-05" }, { "birthDate": "2014-05-05" }, { "birthDate": "2015-05-05" }, { "birthDate": "2016-05-05" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expectedCodes": ["TOO_MANY_ITEMS"]
+    },
+    {
+      "id": "jp-u4-six-dependents",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 6, "children": [{ "birthDate": "2020-05-05" }] },
+      "period": "2024-10-01",
+      "knowledgeDate": "2024-12-01",
+      "expectedCodes": ["FACT_OUT_OF_SCOPE"]
+    },
+    {
+      "id": "jp-u5-mid-month",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 1, "children": [{ "birthDate": "2020-05-05" }] },
+      "period": "2024-10-15",
+      "knowledgeDate": "2024-12-01",
+      "expectedCodes": ["PERIOD_OUT_OF_SCOPE"]
+    },
+    {
+      "id": "jp-u6-before-any-evidence",
+      "facts": { "recipientIncomeYen": 3000000, "dependents": 1, "children": [{ "birthDate": "2020-05-05" }] },
+      "period": "2024-06-01",
+      "knowledgeDate": "2023-01-01",
+      "expectedCodes": ["NO_RULE_FOR_PERIOD"]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Design: Core Model and Feasibility Spikes
+﻿# Design: Core Model and Feasibility Spikes
 
 ## Decisions and trade-offs
 
@@ -31,7 +31,8 @@ interface RuleVersion {
   versionId: string;           // e.g. "2025-original"
   appliesFrom: ISODate;
   appliesTo?: ISODate;         // open-ended when absent
-  knownFrom: ISODate;          // publication date of the source
+  knownFrom: ISODate;          // when the rule became knowable
+  knownFromBasis: "enactment" | "publication" | "snapshot-upper-bound";
   citations: Citation[];       // at least one
   expr: Expr;
 }
@@ -48,10 +49,10 @@ type EvalResult =
 - Logic and comparison: `and`, `or`, `not`, `eq`, `lt`, `lte`, `gt`, `gte`, `inSet`
 - Arithmetic: `add`, `sub`, `mul`, `min`, `max`, `mulBps` (value x basis points, with rounding mode), `if`
 - Tables: `lookup` (key to value), `bands` (progressive thresholds and basis-point rates)
-- Dates: `ageOn` (birth date, date, mode such as "end of fiscal year")
+- Dates: `ageOn` (modes `completedYears` and `throughMarch31After`), `period` (the evaluation period, added in S1)
 - Lists: `sumOver`, `countWhere` (for per-child sums and child order)
 
-S1 may add at most three operators. Needing more triggers the fallback.
+S1 added one operator (`period`). Needing more than three triggers the fallback. Scope declarations gained `period` range, fact `default`, `excludeMonthDays`, `uniqueBy`, and `assumptions`.
 
 ## Temporal example (US)
 ```

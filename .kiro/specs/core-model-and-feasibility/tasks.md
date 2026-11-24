@@ -4,7 +4,7 @@ Time boxes are hard limits. At the limit, stop, record the result in `docs/spike
 
 Order: scaffold, then source availability (S2) and Crew feasibility (S4), then the evaluator (S1). The evaluator is not built until S2 and S4 report and the developer decides at Checkpoint 1.
 
-Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue as planned). Task 5 (S1) is in progress.
+Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue as planned). Task 5 (S1) is done (GO on expressiveness). Next: tasks 6 and 7.
 
 - [x] 1. Scaffold workspace (box: 45 min)
   - [x] 1.1 npm workspace with `packages/core`, TypeScript strict, Vitest, and a `.gitignore` that keeps `.kiro/` tracked and ignores keys and env files
@@ -33,18 +33,18 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
   - _Requirements: R8_
 
 - [x] 4. Checkpoint 1 (box: 15 min) - closed 2026-11-24
-  - [x] 4.1 Push all results (done: `2099fd2` on `main`; the Crew repo is not pushed, see 3.7)
+  - [x] 4.1 Push all results
   - [x] 4.2 **Human:** review the S2 and S4 verdicts
-  - [x] 4.3 Decision: continue as planned, no fallbacks. Decide: continue, apply fallbacks (for S4: plain Kiro agent plus hooks, Crew as bonus only), or change scope. Update this plan.
+  - [x] 4.3 Decision: continue as planned, no fallbacks
 
-- [ ] 5. S1: Expression model and temporal resolution (box: 4 h) - in progress
-  - [ ] 5.1 Zod schema, validation (cycles, overlaps, integer-only), and the initial operator set in `packages/core`
-  - [ ] 5.2 Evaluator with trace, rounding modes, and unsupported results
-  - [ ] 5.3 Temporal resolver, tested with the US dual-date example
-  - [ ] 5.4 Citation check (NFKC, whitespace collapse), tested on Japanese and English quotes including one near-miss that must fail. Test on IRS table rows, which extract one cell per line.
-  - [ ] 5.5 Encode US 2025 original and revised rules (standard deduction and brackets, single filer). Money in integer cents. Decide `knownFrom` for the original: IRB issue date 2024-11-04 or the 2024-10-22 date in the text, and record it.
-  - [ ] 5.6 Encode JP pre- and post-reform rules for the supported scope from the 2023-12-04 and 2024-07-31 snapshots. Record `knownFrom` as a snapshot-date upper bound unless the law text is checked.
-  - [ ] 5.7 `docs/spikes/s1.md` with operators added, fallbacks used, and the verdict
+- [x] 5. S1: Expression model and temporal resolution (box: 4 h) - GO, see `docs/spikes/s1.md`
+  - [x] 5.1 Zod schema, validation (cycles, overlaps, integer-only), and the initial operator set in `packages/core`
+  - [x] 5.2 Evaluator with trace, rounding modes, and unsupported results
+  - [x] 5.3 Temporal resolver, tested with the US dual-date example
+  - [x] 5.4 Citation check (NFKC, whitespace collapse), tested on Japanese and English quotes including one near-miss that must fail. Test on IRS table rows, which extract one cell per line.
+  - [x] 5.5 Encode US 2025 original and revised rules (standard deduction and brackets, single filer). Money in integer cents. Decide `knownFrom` for the original: IRB issue date 2024-11-04 or the 2024-10-22 date in the text, and record it.
+  - [x] 5.6 Encode JP pre- and post-reform rules for the supported scope from the 2023-12-04 and 2024-07-31 snapshots. Record `knownFrom` as a snapshot-date upper bound unless the law text is checked.
+  - [x] 5.7 `docs/spikes/s1.md` with operators added, fallbacks used, and the verdict
   - _Requirements: R1, R2, R3, R4, R7, R8_
 
 - [ ] 6. S3: Approval integrity (box: 2 h) - not started

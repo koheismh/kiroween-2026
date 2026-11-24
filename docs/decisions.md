@@ -26,3 +26,10 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Design addition (from the Crew review): rule versions carry `knownFromBasis` (`enactment`, `publication`, `snapshot-upper-bound`). Added to the S1 schema.
 - Crew remains outside the runtime; its reviews are advice, not gates.
 
+
+## 2026-11-24: S1 result
+- S1 GO on expressiveness. One operator added (`period`). No fallback. Correctness is unchecked until the human attests ground truth (task 7.3). See docs/spikes/s1.md.
+- Old rule versions are open-ended. A newer version supersedes them only from its `knownFrom`. This makes replay before a reform was known return the old rules.
+- Boundary cases the sources do not settle (April 1 births, twins, age-3 boundary month) are excluded by scope or listed as unverified. They are not guessed.
+- Weakness to disclose: nested JSON rules are hard to read in review and needed a generator script.
+

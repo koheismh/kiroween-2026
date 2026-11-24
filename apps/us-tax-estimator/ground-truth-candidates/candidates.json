@@ -1,0 +1,87 @@
+{
+  "note": "Agent-suggested examples derived from the cited sources. NOT attested ground truth. No gate uses them. A human must verify each one against the official source and move it to ground-truth/ via the attest command (task 7.3).",
+  "examples": [
+    {
+      "id": "us-1-revised",
+      "description": "Single filer, wages $50,000, revised 2025 standard deduction",
+      "source": "us-irb-2025-45, section 3.01 (standard deduction $15,750); us-irb-2024-45 Table 3 (brackets)",
+      "facts": { "wagesCents": 5000000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expected": { "standardDeductionCents": 1575000, "incomeTaxCents": 387150 }
+    },
+    {
+      "id": "us-2-historical",
+      "description": "Same filer as of 2025-06-30, before the July 4, 2025 enactment",
+      "source": "us-irb-2024-45 section 2.15 (standard deduction $15,000)",
+      "facts": { "wagesCents": 5000000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-06-30",
+      "expected": { "standardDeductionCents": 1500000, "incomeTaxCents": 396150 }
+    },
+    {
+      "id": "us-3-table-threshold-22",
+      "description": "Taxable income exactly $48,475: the published row says $5,578.50",
+      "source": "us-irb-2024-45 Table 3, row 'Over $48,475 but not over $103,350'",
+      "facts": { "wagesCents": 6422500, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expected": { "incomeTaxCents": 557850 }
+    },
+    {
+      "id": "us-4-below-deduction",
+      "description": "Wages below the standard deduction",
+      "source": "derived: taxable income cannot be negative",
+      "facts": { "wagesCents": 1000000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expected": { "incomeTaxCents": 0 }
+    },
+    {
+      "id": "us-5-table-threshold-37",
+      "description": "Taxable income exactly $626,350: the published row says $188,769.75",
+      "source": "us-irb-2024-45 Table 3, last row",
+      "facts": { "wagesCents": 64210000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expected": { "incomeTaxCents": 18876975 }
+    }
+  ],
+  "unsupported": [
+    {
+      "id": "us-u1-other-filing-status",
+      "facts": { "wagesCents": 5000000, "filingStatus": "married_joint", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expectedCodes": ["FACT_OUT_OF_SCOPE"]
+    },
+    {
+      "id": "us-u2-other-year",
+      "facts": { "wagesCents": 5000000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2024-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expectedCodes": ["PERIOD_OUT_OF_SCOPE"]
+    },
+    {
+      "id": "us-u3-age-65",
+      "facts": { "wagesCents": 5000000, "filingStatus": "single", "age65OrOlder": true, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expectedCodes": ["FACT_OUT_OF_SCOPE"]
+    },
+    {
+      "id": "us-u4-unknown-fact",
+      "facts": { "wagesCents": 5000000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false, "tipsCents": 100000 },
+      "period": "2025-12-31",
+      "knowledgeDate": "2025-12-31",
+      "expectedCodes": ["UNKNOWN_FACT"]
+    },
+    {
+      "id": "us-u5-before-anything-known",
+      "facts": { "wagesCents": 5000000, "filingStatus": "single", "age65OrOlder": false, "blind": false, "claimedAsDependent": false },
+      "period": "2025-12-31",
+      "knowledgeDate": "2024-01-01",
+      "expectedCodes": ["NO_RULE_FOR_PERIOD"]
+    }
+  ]
+}

@@ -1,0 +1,591 @@
+{
+  "appId": "jp-child-allowance",
+  "schemaVersion": 1,
+  "scope": {
+    "period": {
+      "min": "2023-12-01",
+      "max": "2026-11-01",
+      "dayOfMonth": 1
+    },
+    "facts": {
+      "recipientIncomeYen": {
+        "type": "integer",
+        "min": 0,
+        "max": 100000000
+      },
+      "dependents": {
+        "type": "integer",
+        "min": 0,
+        "max": 5
+      },
+      "children": {
+        "type": "array",
+        "maxItems": 6,
+        "uniqueBy": "birthDate",
+        "item": {
+          "birthDate": {
+            "type": "date",
+            "min": "1995-01-01",
+            "excludeMonthDays": [
+              "04-01"
+            ]
+          },
+          "supported": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "assumptions": [
+      "Monthly amount for one recipient household. Period is the first day of the payment month.",
+      "Age is measured on the first day of that month. Boundary months for the age-3 step are not verified.",
+      "Children born on April 1 are unsupported (the legal day of attaining an age differs by one day).",
+      "Children with the same birth date (twins) are unsupported (order is ambiguous).",
+      "Income is the recipient's income figure as used in the official limit table, in yen. Dependents 0 to 5 only.",
+      "Facility residents, overseas residents, and public servants are out of scope.",
+      "Demonstration estimate. Not official advice."
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "incomeLimitYen",
+      "versionId": "2023-12",
+      "appliesFrom": "2023-12-01",
+      "knownFrom": "2023-12-04",
+      "knownFromBasis": "snapshot-upper-bound",
+      "citations": [
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "0人 （前年末に児童が生まれていない場合　等） 622 833.3 858 1071 1人 （児童1人の場合　等） 660 875.6 896 1124 2人 （児童1人 ＋ 年収103万円以下の配偶者の場合　等） 698 917.8 934 1162 3人 （児童2人 ＋ 年収103万円以下の配偶者の場合　等） 736 960 972 1200 4人 （児童3人 ＋ 年収103万円以下の配偶者の場合　等） 774 1002 1010 1238 5人 （児童4人 ＋ 年収103万円以下の配偶者の場合　等） 812 1040 1048 1276 ※扶養親族等の数は、所得税法上の同一生計配偶者及び扶養親族（施設入所等児童を除く。以下、「扶養親族等」という。） 並びに扶養親族等でない児童で前年の12月31日において生計を維持したものの数をいいます。"
+        }
+      ],
+      "expr": {
+        "op": "lookup",
+        "key": {
+          "op": "fact",
+          "path": "dependents"
+        },
+        "table": {
+          "0": 6220000,
+          "1": 6600000,
+          "2": 6980000,
+          "3": 7360000,
+          "4": 7740000,
+          "5": 8120000
+        }
+      }
+    },
+    {
+      "ruleId": "incomeCapYen",
+      "versionId": "2023-12",
+      "appliesFrom": "2023-12-01",
+      "knownFrom": "2023-12-04",
+      "knownFromBasis": "snapshot-upper-bound",
+      "citations": [
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "0人 （前年末に児童が生まれていない場合　等） 622 833.3 858 1071 1人 （児童1人の場合　等） 660 875.6 896 1124 2人 （児童1人 ＋ 年収103万円以下の配偶者の場合　等） 698 917.8 934 1162 3人 （児童2人 ＋ 年収103万円以下の配偶者の場合　等） 736 960 972 1200 4人 （児童3人 ＋ 年収103万円以下の配偶者の場合　等） 774 1002 1010 1238 5人 （児童4人 ＋ 年収103万円以下の配偶者の場合　等） 812 1040 1048 1276 ※扶養親族等の数は、所得税法上の同一生計配偶者及び扶養親族（施設入所等児童を除く。以下、「扶養親族等」という。） 並びに扶養親族等でない児童で前年の12月31日において生計を維持したものの数をいいます。"
+        },
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "なお、令和4年10月支給分から、児童を養育している方の所得が②以上の場合、児童手当等は支給されません。"
+        }
+      ],
+      "expr": {
+        "op": "lookup",
+        "key": {
+          "op": "fact",
+          "path": "dependents"
+        },
+        "table": {
+          "0": 8580000,
+          "1": 8960000,
+          "2": 9340000,
+          "3": 9720000,
+          "4": 10100000,
+          "5": 10480000
+        }
+      }
+    },
+    {
+      "ruleId": "monthlyAllowanceYen",
+      "versionId": "pre-2024-10",
+      "appliesFrom": "2023-12-01",
+      "knownFrom": "2023-12-04",
+      "knownFromBasis": "snapshot-upper-bound",
+      "citations": [
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "中学校卒業まで（15歳の誕生日後の最初の3月31日まで）の児童を養育している方"
+        },
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "3歳未満 一律15,000円"
+        },
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "3歳以上 小学校修了前 10,000円 （第3子以降は15,000円）"
+        },
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "中学生 一律10,000円"
+        },
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "※児童を養育している方の所得が所得制限限度額以上、所得上限限度額未満の場合は、特例給付として月額一律5,000円を支給します。"
+        },
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "※「第3子以降」とは、高校卒業まで（18歳の誕生日後の最初の3月31日まで）の養育している児童のうち、3番目以降をいいます。"
+        }
+      ],
+      "expr": {
+        "op": "sumOver",
+        "list": "children",
+        "as": "child",
+        "expr": {
+          "op": "if",
+          "cond": {
+            "op": "and",
+            "args": [
+              {
+                "op": "lte",
+                "left": {
+                  "op": "fact",
+                  "path": "$child.birthDate"
+                },
+                "right": {
+                  "op": "period"
+                }
+              },
+              {
+                "op": "ageOn",
+                "mode": "throughMarch31After",
+                "age": 15,
+                "birth": {
+                  "op": "fact",
+                  "path": "$child.birthDate"
+                },
+                "on": {
+                  "op": "period"
+                }
+              }
+            ]
+          },
+          "then": {
+            "op": "if",
+            "cond": {
+              "op": "gte",
+              "left": {
+                "op": "fact",
+                "path": "recipientIncomeYen"
+              },
+              "right": {
+                "op": "ref",
+                "rule": "incomeCapYen"
+              }
+            },
+            "then": {
+              "op": "lit",
+              "value": 0
+            },
+            "else": {
+              "op": "if",
+              "cond": {
+                "op": "gte",
+                "left": {
+                  "op": "fact",
+                  "path": "recipientIncomeYen"
+                },
+                "right": {
+                  "op": "ref",
+                  "rule": "incomeLimitYen"
+                }
+              },
+              "then": {
+                "op": "lit",
+                "value": 5000
+              },
+              "else": {
+                "op": "if",
+                "cond": {
+                  "op": "lt",
+                  "left": {
+                    "op": "ageOn",
+                    "mode": "completedYears",
+                    "birth": {
+                      "op": "fact",
+                      "path": "$child.birthDate"
+                    },
+                    "on": {
+                      "op": "period"
+                    }
+                  },
+                  "right": {
+                    "op": "lit",
+                    "value": 3
+                  }
+                },
+                "then": {
+                  "op": "lit",
+                  "value": 15000
+                },
+                "else": {
+                  "op": "if",
+                  "cond": {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "ageOn",
+                        "mode": "throughMarch31After",
+                        "age": 12,
+                        "birth": {
+                          "op": "fact",
+                          "path": "$child.birthDate"
+                        },
+                        "on": {
+                          "op": "period"
+                        }
+                      },
+                      {
+                        "op": "gte",
+                        "left": {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "lit",
+                              "value": 1
+                            },
+                            {
+                              "op": "countWhere",
+                              "list": "children",
+                              "as": "other",
+                              "where": {
+                                "op": "and",
+                                "args": [
+                                  {
+                                    "op": "lt",
+                                    "left": {
+                                      "op": "fact",
+                                      "path": "$other.birthDate"
+                                    },
+                                    "right": {
+                                      "op": "fact",
+                                      "path": "$child.birthDate"
+                                    }
+                                  },
+                                  {
+                                    "op": "and",
+                                    "args": [
+                                      {
+                                        "op": "lte",
+                                        "left": {
+                                          "op": "fact",
+                                          "path": "$other.birthDate"
+                                        },
+                                        "right": {
+                                          "op": "period"
+                                        }
+                                      },
+                                      {
+                                        "op": "ageOn",
+                                        "mode": "throughMarch31After",
+                                        "age": 18,
+                                        "birth": {
+                                          "op": "fact",
+                                          "path": "$other.birthDate"
+                                        },
+                                        "on": {
+                                          "op": "period"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "right": {
+                          "op": "lit",
+                          "value": 3
+                        }
+                      }
+                    ]
+                  },
+                  "then": {
+                    "op": "lit",
+                    "value": 15000
+                  },
+                  "else": {
+                    "op": "lit",
+                    "value": 10000
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "op": "lit",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "ruleId": "monthlyAllowanceYen",
+      "versionId": "post-2024-10",
+      "appliesFrom": "2024-10-01",
+      "knownFrom": "2024-07-31",
+      "knownFromBasis": "snapshot-upper-bound",
+      "citations": [
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "令和6年10月から児童手当制度が変わります"
+        },
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "児童（0歳から18歳に達する日以後の最初の3月31日までの間にある子をいいます。以下同じ。）を養育している方"
+        },
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "3歳未満 15,000円（第3子以降は30,000円）"
+        },
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "3歳以上高校生年代まで 10,000円（第3子以降は30,000円）"
+        },
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "※「第3子以降」とは、児童及び児童の兄姉等のうち、年齢が上の子から数えて3人目以降の子のことをいいます。"
+        },
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "児童の兄姉等（18歳に達する日以後の最初の3月31日を経過した後の22歳に達する日以後の最初の3月31日までの間にあって親等に経済的負担のある子をいいます。以下同じ。）について監護に相当する世話等をし、その生計費を負担している方（「監護相当・生計費の負担についての確認書」等の提出が必要となります。）"
+        },
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "中学生以下の児童を養育しているが、所得上限限度額を超過し、児童手当も特例給付も受給していない方"
+        }
+      ],
+      "expr": {
+        "op": "sumOver",
+        "list": "children",
+        "as": "child",
+        "expr": {
+          "op": "if",
+          "cond": {
+            "op": "and",
+            "args": [
+              {
+                "op": "lte",
+                "left": {
+                  "op": "fact",
+                  "path": "$child.birthDate"
+                },
+                "right": {
+                  "op": "period"
+                }
+              },
+              {
+                "op": "ageOn",
+                "mode": "throughMarch31After",
+                "age": 18,
+                "birth": {
+                  "op": "fact",
+                  "path": "$child.birthDate"
+                },
+                "on": {
+                  "op": "period"
+                }
+              }
+            ]
+          },
+          "then": {
+            "op": "if",
+            "cond": {
+              "op": "gte",
+              "left": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "lit",
+                    "value": 1
+                  },
+                  {
+                    "op": "countWhere",
+                    "list": "children",
+                    "as": "other",
+                    "where": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "lt",
+                          "left": {
+                            "op": "fact",
+                            "path": "$other.birthDate"
+                          },
+                          "right": {
+                            "op": "fact",
+                            "path": "$child.birthDate"
+                          }
+                        },
+                        {
+                          "op": "and",
+                          "args": [
+                            {
+                              "op": "lte",
+                              "left": {
+                                "op": "fact",
+                                "path": "$other.birthDate"
+                              },
+                              "right": {
+                                "op": "period"
+                              }
+                            },
+                            {
+                              "op": "or",
+                              "args": [
+                                {
+                                  "op": "ageOn",
+                                  "mode": "throughMarch31After",
+                                  "age": 18,
+                                  "birth": {
+                                    "op": "fact",
+                                    "path": "$other.birthDate"
+                                  },
+                                  "on": {
+                                    "op": "period"
+                                  }
+                                },
+                                {
+                                  "op": "and",
+                                  "args": [
+                                    {
+                                      "op": "ageOn",
+                                      "mode": "throughMarch31After",
+                                      "age": 22,
+                                      "birth": {
+                                        "op": "fact",
+                                        "path": "$other.birthDate"
+                                      },
+                                      "on": {
+                                        "op": "period"
+                                      }
+                                    },
+                                    {
+                                      "op": "fact",
+                                      "path": "$other.supported"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "right": {
+                "op": "lit",
+                "value": 3
+              }
+            },
+            "then": {
+              "op": "lit",
+              "value": 30000
+            },
+            "else": {
+              "op": "if",
+              "cond": {
+                "op": "lt",
+                "left": {
+                  "op": "ageOn",
+                  "mode": "completedYears",
+                  "birth": {
+                    "op": "fact",
+                    "path": "$child.birthDate"
+                  },
+                  "on": {
+                    "op": "period"
+                  }
+                },
+                "right": {
+                  "op": "lit",
+                  "value": 3
+                }
+              },
+              "then": {
+                "op": "lit",
+                "value": 15000
+              },
+              "else": {
+                "op": "lit",
+                "value": 10000
+              }
+            }
+          },
+          "else": {
+            "op": "lit",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "ruleId": "paymentsPerYear",
+      "versionId": "pre-2024-10",
+      "appliesFrom": "2023-12-01",
+      "knownFrom": "2023-12-04",
+      "knownFromBasis": "snapshot-upper-bound",
+      "citations": [
+        {
+          "sourceId": "jp-cfa-annai-20231204",
+          "snapshotSha256": "5ce93290fec8436a7e2da91654f0ac61a5bef6c6959e868b614137f52c92d9b1",
+          "quote": "原則として、毎年6月、10月、2月に、それぞれの前月分までの手当を支給します。"
+        }
+      ],
+      "expr": {
+        "op": "lit",
+        "value": 3
+      }
+    },
+    {
+      "ruleId": "paymentsPerYear",
+      "versionId": "post-2024-10",
+      "appliesFrom": "2024-10-01",
+      "knownFrom": "2024-07-31",
+      "knownFromBasis": "snapshot-upper-bound",
+      "citations": [
+        {
+          "sourceId": "jp-cfa-mottoouen-20240731",
+          "snapshotSha256": "bda926d93724a5f378e1e5e6e817efdabdf26acfadb42d595a922a797e454fd0",
+          "quote": "児童手当は、毎年2月、4月、6月、8月、10月、12月（偶数月）に、それぞれの前月分まで（2か月分）を支給します。"
+        }
+      ],
+      "expr": {
+        "op": "lit",
+        "value": 6
+      }
+    }
+  ]
+}
