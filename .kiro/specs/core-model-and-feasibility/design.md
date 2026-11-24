@@ -61,7 +61,13 @@ standardDeduction.single:
 evaluate(period 2025-12-31, knowledgeDate 2025-06-30) -> 1500000
 evaluate(period 2025-12-31, knowledgeDate 2025-12-31) -> 1575000
 ```
-The same resolver supports Japan, where `appliesFrom` is the October 2024 effective period and `knownFrom` is the enactment or publication date found in S2. Exact dates and amounts come from sources, not from this document.
+The same resolver supports Japan, where `appliesFrom` is the October 2024 effective period. Exact dates and amounts come from sources, not from this document.
+
+Findings from S2 that refine this:
+- US original `knownFrom`: IRB 2024-45 is dated 2024-11-04, but Rev. Proc. 2024-40 states its figures reflect law as of 2024-10-22. Task 5.5 picks one and records it.
+- JP `knownFrom`: the 2024-07-31 Wayback capture is only an upper bound. The enactment date is not in the snapshots.
+- US money is integer cents (IRS brackets contain cents, for example $1,192.50).
+- Table rows extract one cell per line, so citations should quote single rows and rely on whitespace collapsing.
 
 ## Approval flow
 1. `pack.json` -> canonical bytes (sorted keys, integers only) -> SHA-256.
@@ -72,7 +78,7 @@ The same resolver supports Japan, where `appliesFrom` is the October 2024 effect
 ## Ground truth flow
 - Human writes or confirms examples from official sources into `ground-truth/`, then runs `attest`, which writes `ground-truth.lock`.
 - Agents propose examples into `ground-truth-candidates/` only.
-- Hooks (created in task 6) ask for confirmation on agent writes to `ground-truth/**` and `approvals/**`. Hooks are a guard rail. The digest lock is the enforcement.
+- Hooks (created in task 7.2) ask for confirmation on agent writes to `ground-truth/**` and `approvals/**`. Hooks are a guard rail. The digest lock is the enforcement.
 - Where a second independent oracle exists (for example IRS tax tables), prefer it. S2 records which are available.
 
 ## Spike notes
