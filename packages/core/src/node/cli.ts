@@ -1,4 +1,5 @@
-// CLI: keygen, approve, verify (task 6.3). Run by the human, not by agents.
+// CLI: keygen, approve, verify (task 6.3), attest (task 7.1). Run by the human, not by agents.
+//   changeling attest  --app <dir>            lock the ground-truth examples (writes ground-truth.lock)
 //   changeling keygen  --app <dir> [--key <path>]
 //   changeling approve --app <dir> [--key <path>] [--at YYYY-MM-DD]
 //   changeling verify  --app <dir>
@@ -7,6 +8,8 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { dirname, join, parse, resolve } from "node:path";
 import { isIsoDate } from "../dates.js";
 import { checkTrustAnchors } from "../trust.js";
+import { describeFailure } from "../groundtruth.js";
+import { attestGroundTruth } from "./groundtruth-files.js";
 import { appPath, prepareApp, verifyApp, readPublicKey, readTrustAnchors } from "./approval-files.js";
 import { restrictToCurrentUser, type AclResult } from "./acl.js";
 import { generateApproverKey, publicKeyId, signPayload, verifyPayload } from "./signing.js";
@@ -59,11 +62,11 @@ async function getPassphrase(io: CliIo, confirm: boolean): Promise<string | null
 }
 
 const MIN_PASSPHRASE = 16;
-const USAGE = "usage: changeling <keygen|approve|verify> --app <dir> [--key <path>] [--at YYYY-MM-DD] [--trust-key-id <hex>]";
+const USAGE = "usage: changeling <keygen|approve|verify|attest> --app <dir> [--key <path>] [--at YYYY-MM-DD] [--trust-key-id <hex>]";
 
 export async function runCli(argv: string[], io: CliIo): Promise<number> {
   const [cmd, ...rest] = argv;
-  if (cmd !== "keygen" && cmd !== "approve" && cmd !== "verify") {
+  if (cmd !== "keygen" && cmd !== "approve" && cmd !== "verify" && cmd !== "attest") {
     io.err(USAGE);
     return 2;
   }
@@ -75,6 +78,15 @@ export async function runCli(argv: string[], io: CliIo): Promise<number> {
     return 2;
   }
   const appDir = resolve(appArg);
+  if (cmd === "attest") {
+    const res = attestGroundTruth(appDir);
+    if (res.ok) {
+      io.out(`attested ${res.count} example(s); lock written to ${appPath(appDir, "lock")}`);
+      return 0;
+    }
+    for (const f of res.failures) io.err(`REFUSED: ${describeFailure(f)}`);
+    return 1;
+  }
   const keyPath = resolve(opts.get("key") ?? join(io.home, ".changeling", "approver.key"));
 
   const oob = opts.get("trust-key-id") ?? (io.env[TRUSTED_KEY_ID_ENV] || undefined);
