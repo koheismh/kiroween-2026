@@ -55,3 +55,8 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Decision: `ground-truth/ground-truth.lock` is `{schemaVersion:1, files:{<name>: sha256 of canonical example JSON}}`. Canonical digests make formatting-only edits (whitespace, key order, line endings) neutral. Every other entry in `ground-truth/` (non-JSON file, subdirectory) is flagged, so nothing can be added unlocked. `attest` refuses invalid examples, duplicate ids, floats, and an empty directory. The gate only reads `ground-truth/`, never `ground-truth-candidates/`.
 - Not done here: the gate checks integrity only. Running the rule pack against the examples is task 7.4/7.5.
 - Finding (unverified cause): `acl.test.ts` timed out at 5000 ms once in a full `npm test` run (about 73 s, machine under load, `icacls` call) and passed when run alone. Treat as flaky under load. Not changed.
+
+## 2026-11-26: Out-of-band fix attempt failed (before task 7.3)
+- Event: a request to fix the ground-truth schema (array/object facts, empty `expected`) and verify the hook live was not a spec task. `spec-task-execution` refused it because it only runs staged tasks. The fallback `kirocrew-worker` timed out after 3600000 ms with no result.
+- Verified: afterwards `git status` showed no changes (HEAD `4139ace`, in sync with origin) and no stray test files.
+- Decision: track the work as tasks 7.2a (schema fix and regression tests) and 7.2b (live hook verification), run individually before 7.3. Status: open.
