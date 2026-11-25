@@ -1,0 +1,117 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "6.1 Canonical JSON, digests, Ed25519 sign and verify with `node:crypto`": [
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527586703
+      },
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527724300
+      }
+    ],
+    "6.2 Gate report format and the required-gate list declared by the skeleton": [
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527728139
+      },
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527802354
+      }
+    ],
+    "6.3 CLI `keygen`, `approve`, `verify`. `approve` and the loader fail when any required gate failed, is missing, or is bound to a different pack digest.": [
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527807920
+      },
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527958013
+      }
+    ],
+    "6.4 Tests: tamper detection for pack, gate report, ground-truth lock, and signature; approval refused on failed, missing, and stale gates": [
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795527962615
+      },
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795528109205
+      }
+    ],
+    "6.5 Test WebCrypto Ed25519 verification in a real browser, or choose build-time verification": [
+      {
+        "executionId": "1c26c0b1-0c2a-43a3-ac2f-d1fb2d6707fe",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795528112533
+      }
+    ],
+    "6.6 **Human:** run `keygen` and keep the passphrase private. Runs after 6.7. `keygen` prints the key id. Pin it in `apps/<app>/trust-anchor.json`, review that file in a commit, and record the id out of band (for example a password manager entry).": [
+      {
+        "executionId": "0909b968-52d8-4c84-9303-9873f99ffbc5",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795543414451
+      }
+    ],
+    "6. S3: Approval integrity (box: 2 h) - GO, see `docs/spikes/s3.md`; 6.6 is a human step": [
+      {
+        "executionId": "0909b968-52d8-4c84-9303-9873f99ffbc5",
+        "chatSessionId": "sess_9a489dac-3a61-49ca-b824-b54dacb2dd79",
+        "timestamp": 1795543415427
+      }
+    ],
+    "7.1 `attest` and the ground-truth gate against `ground-truth.lock`": [
+      {
+        "executionId": "accc3090-3e07-498b-ae47-b17cd0a6f357",
+        "chatSessionId": "sess_17fe2a61-41c0-4604-be4e-098984eeaa54",
+        "timestamp": 1795570145561
+      },
+      {
+        "executionId": "accc3090-3e07-498b-ae47-b17cd0a6f357",
+        "chatSessionId": "sess_17fe2a61-41c0-4604-be4e-098984eeaa54",
+        "timestamp": 1795570520956
+      }
+    ],
+    "7.2 PreToolUse hook that asks before agent writes to `**/ground-truth/**` and `**/approvals/**`": [
+      {
+        "executionId": "f07572a4-92fd-4b63-846b-e163d9a5a31e",
+        "chatSessionId": "sess_3548ccea-8f13-42a1-b452-3b8c41f2a6c0",
+        "timestamp": 1795579785596
+      }
+    ],
+    "7.2.1 Fix the ground-truth schema: allow nested array and object facts (integers, strings, booleans, null; no floats) as used by the JP rule pack, and reject empty `expected` outputs. Add regression tests using both apps' input formats (US flat facts, JP array/object facts), including rejection cases. Temp directories or in-memory data only; no real ground truth, no `attest` on real apps.": [
+      {
+        "executionId": "e961d675-2512-442b-8a77-92221d65089c",
+        "chatSessionId": "sess_d1cbdb16-4d35-4b53-8ef7-4c2efeb33d23",
+        "timestamp": 1795611639910
+      },
+      {
+        "executionId": "e961d675-2512-442b-8a77-92221d65089c",
+        "chatSessionId": "sess_d1cbdb16-4d35-4b53-8ef7-4c2efeb33d23",
+        "timestamp": 1795611885886
+      }
+    ],
+    "7.2.2 Verify the PreToolUse hook in a live Kiro session using disposable files only (a `ground-truth/` path, an `approvals/` path, and a `ground-truth-candidates/` control). Delete them afterwards and confirm with `git status`. Record the result in `docs/spikes/s3.md`, including anything not observed.": [
+      {
+        "executionId": "b4e5b43e-194f-476d-9646-1840232dbd57",
+        "chatSessionId": "sess_be36ab50-fb21-463f-a1d9-2d2bd44bd091",
+        "timestamp": 1795613565880
+      },
+      {
+        "executionId": "ec901c59-fc6f-4672-8fc0-9f56611230b2",
+        "chatSessionId": "sess_469244f9-c6ae-4029-b7a8-8798ee580371",
+        "timestamp": 1795624166287
+      }
+    ]
+  }
+}
