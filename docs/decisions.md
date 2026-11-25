@@ -60,3 +60,9 @@ Short entries. Newest last. Format: date, decision, reason, consequence.
 - Event: a request to fix the ground-truth schema (array/object facts, empty `expected`) and verify the hook live was not a spec task. `spec-task-execution` refused it because it only runs staged tasks. The fallback `kirocrew-worker` timed out after 3600000 ms with no result.
 - Verified: afterwards `git status` showed no changes (HEAD `4139ace`, in sync with origin) and no stray test files.
 - Decision: track the work as tasks 7.2a (schema fix and regression tests) and 7.2b (live hook verification), run individually before 7.3. Status: open.
+
+## 2026-11-26: Task tools accept numeric-only task IDs
+
+- Finding: `task_get` and `task_update` returned "not found" for IDs with a letter suffix (`7.2a`, `7.2b`, `8a`). Verified: both calls failed on 7.2a. The status `[~]` on 7.2a was left by the failed out-of-band attempt and is reset to `[ ]`.
+- Decision: renamed 7.2a to 7.2.1, 7.2b to 7.2.2, and 8a to 8.5 (under task 8). Use numeric-only IDs (`N`, `N.M`, `N.M.K`) from now on.
+- Verification: `task_get` finds 7.2.1, 7.2.2, and 8.5, all `not_started`. Not verified: `task_update` on the new IDs (no status change was made, by request). git grep shows the old IDs only in this file's history entries.

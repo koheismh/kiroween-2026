@@ -63,8 +63,8 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
 - [ ] 7. Ground-truth protection and hooks (box: 1.5 h; depends on 6) - not started
   - [x] 7.1 `attest` and the ground-truth gate against `ground-truth.lock`
   - [x] 7.2 PreToolUse hook that asks before agent writes to `**/ground-truth/**` and `**/approvals/**`
-  - [ ] 7.2a Fix the ground-truth schema: allow nested array and object facts (integers, strings, booleans, null; no floats) as used by the JP rule pack, and reject empty `expected` outputs. Add regression tests using both apps' input formats (US flat facts, JP array/object facts), including rejection cases. Temp directories or in-memory data only; no real ground truth, no `attest` on real apps.
-  - [ ] 7.2b Verify the PreToolUse hook in a live Kiro session using disposable files only (a `ground-truth/` path, an `approvals/` path, and a `ground-truth-candidates/` control). Delete them afterwards and confirm with `git status`. Record the result in `docs/spikes/s3.md`, including anything not observed.
+  - [ ] 7.2.1 Fix the ground-truth schema: allow nested array and object facts (integers, strings, booleans, null; no floats) as used by the JP rule pack, and reject empty `expected` outputs. Add regression tests using both apps' input formats (US flat facts, JP array/object facts), including rejection cases. Temp directories or in-memory data only; no real ground truth, no `attest` on real apps.
+  - [ ] 7.2.2 Verify the PreToolUse hook in a live Kiro session using disposable files only (a `ground-truth/` path, an `approvals/` path, and a `ground-truth-candidates/` control). Delete them afterwards and confirm with `git status`. Record the result in `docs/spikes/s3.md`, including anything not observed.
   - [ ] 7.3 **Human:** author and attest at least 3 US and 3 JP examples from official sources. An agent may list candidates in `ground-truth-candidates/`.
   - [ ] 7.4 Run the S1 rule sets against attested examples and record mismatches
   - [ ] 7.5 Gate recomputation before approval: `approve` recomputes the schema, citations, and ground-truth gates itself from the pack, source snapshots, and attested ground truth. It must not read or trust a stored `gate-report.json`. The report is an output of that run, bound to the pack digest. `verifyApproval` keeps its stored-report check as tamper evidence only. Add tests where a hand-written passing report over a failing pack is not approvable. _Requirements: R5.5, R5.8, R6_
@@ -75,9 +75,10 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
   - [ ] 8.2 A Kiro agent drafts a proposal. Record the prompt and the unedited output.
   - [ ] 8.3 Run all required gates. Record every failure.
   - [ ] 8.4 List any human edits in `docs/spikes/s5.md`
+  - [ ] 8.5 Later, before the Crew reviewer reads real reports: align the Crew sample gate-report with `GateReport` (see the open finding in `docs/decisions.md`, 2026-11-25). Not started.
   - _Requirements: R8_
 
-- [ ] 8a. Later, before the Crew reviewer reads real reports: align the Crew sample gate-report with `GateReport` (see the open finding in `docs/decisions.md`, 2026-11-25). Not started.
+
 - [ ] 9. Checkpoint 2 (box: 30 min)
   - [ ] 9.1 Summarize all verdicts and fallbacks in `docs/decisions.md`
   - [ ] 9.2 Developer decides next steps. Draft the next spec (apps, workflow, impact report) only after this decision.
