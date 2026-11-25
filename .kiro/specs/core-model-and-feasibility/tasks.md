@@ -1,4 +1,4 @@
-# Tasks: Core Model and Feasibility Spikes
+﻿# Tasks: Core Model and Feasibility Spikes
 
 Time boxes are hard limits. At the limit, stop, record the result in `docs/spikes/<id>.md`, and report GO, GO-WITH-FALLBACK, or NO-GO. Do not extend a box without approval. Commit and push after each numbered task (see git-workflow steering).
 
@@ -61,8 +61,8 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
   - _Requirements: R5, R8_
 
 - [ ] 7. Ground-truth protection and hooks (box: 1.5 h; depends on 6) - not started
-  - [ ] 7.1 `attest` and the ground-truth gate against `ground-truth.lock`
-  - [ ] 7.2 PreToolUse hook that asks before agent writes to `**/ground-truth/**` and `**/approvals/**`
+  - [x] 7.1 `attest` and the ground-truth gate against `ground-truth.lock`
+  - [x] 7.2 PreToolUse hook that asks before agent writes to `**/ground-truth/**` and `**/approvals/**`
   - [ ] 7.3 **Human:** author and attest at least 3 US and 3 JP examples from official sources. An agent may list candidates in `ground-truth-candidates/`.
   - [ ] 7.4 Run the S1 rule sets against attested examples and record mismatches
   - [ ] 7.5 Gate recomputation before approval: `approve` recomputes the schema, citations, and ground-truth gates itself from the pack, source snapshots, and attested ground truth. It must not read or trust a stored `gate-report.json`. The report is an output of that run, bound to the pack digest. `verifyApproval` keeps its stored-report check as tamper evidence only. Add tests where a hand-written passing report over a failing pack is not approvable. _Requirements: R5.5, R5.8, R6_
