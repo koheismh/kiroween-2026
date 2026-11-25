@@ -7,7 +7,11 @@ import type { GateResult } from "./gates.js";
 
 const HEX64 = /^[0-9a-f]{64}$/;
 const IsoDate = z.string().refine(isIsoDate, "expected YYYY-MM-DD");
-const Scalar = z.union([z.number().int(), z.string(), z.boolean()]);
+/** JSON value with integers, strings, booleans and null only. Floats are rejected at any depth. */
+export type FactValue = number | string | boolean | null | FactValue[] | { [key: string]: FactValue };
+const FactValueSchema: z.ZodType<FactValue> = z.lazy(() =>
+  z.union([z.number().int().safe(), z.string(), z.boolean(), z.null(), z.array(FactValueSchema), z.record(z.string(), FactValueSchema)]),
+);
 
 /** One human-attested example taken from an official source. */
 export const GroundTruthExampleSchema = z
@@ -20,9 +24,9 @@ export const GroundTruthExampleSchema = z
     /** Evaluation period (an ISO date inside the period) and knowledge date. */
     period: IsoDate,
     knowledgeDate: IsoDate,
-    facts: z.record(z.string(), Scalar),
-    /** Expected output as the source states it. Integers only; no floating-point numbers. */
-    expected: z.record(z.string(), z.union([Scalar, z.null()])),
+    facts: z.record(z.string(), FactValueSchema),
+    /** Expected output as the source states it. Integers only; no floating-point numbers; at least one key. */
+    expected: z.record(z.string(), FactValueSchema).refine((e) => Object.keys(e).length > 0, "expected must not be empty"),
     /** Name of the human who attested the example. */
     attester: z.string().min(1),
   })
