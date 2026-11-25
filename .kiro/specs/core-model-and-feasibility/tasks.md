@@ -50,14 +50,14 @@ Status as of 2026-11-24 (JST): tasks 1 to 4 done. Checkpoint 1 closed (continue 
     - [x] 5.8.2 Reject dates after the evaluation period via `notAfterPeriod` (code `DATE_AFTER_PERIOD`). JP birth dates use it. Redundant rule guards removed and the JP pack regenerated. _Requirements: R4.3_
     - [x] 5.8.3 Regression tests: tampered text, tampered bytes, forged metadata, missing file, fully rewritten snapshot, fake quote in `extracted.txt`, and a birth date after the period (unit test plus candidate `jp-u7`). _Requirements: R4.3, R7.2, R7.4_  - _Requirements: R1, R2, R3, R4, R7, R8_
 
-- [~] 6. S3: Approval integrity (box: 2 h) - GO, see `docs/spikes/s3.md`; 6.6 is a human step
+- [x] 6. S3: Approval integrity (box: 2 h) - GO, see `docs/spikes/s3.md`; 6.6 done 2026-11-25 (commit 6dd24bc)
   - [x] 6.1 Canonical JSON, digests, Ed25519 sign and verify with `node:crypto`
   - [x] 6.2 Gate report format and the required-gate list declared by the skeleton
   - [x] 6.3 CLI `keygen`, `approve`, `verify`. `approve` and the loader fail when any required gate failed, is missing, or is bound to a different pack digest.
   - [x] 6.4 Tests: tamper detection for pack, gate report, ground-truth lock, and signature; approval refused on failed, missing, and stale gates
   - [x] 6.5 Test WebCrypto Ed25519 verification in a real browser, or choose build-time verification (GO on Edge and Chrome 158, see `docs/spikes/s3.md`)
   - [x] 6.7 Hardening (2026-11-25): trust anchor (`untrusted-key`, `no-trust-anchor`, fail closed), Windows ACL on the key file, 16-character passphrase minimum, key management decisions. See `docs/decisions.md` and `docs/spikes/s3.md`. _Requirements: R5.4, R5.7_
-  - [ ] 6.6 **Human:** run `keygen` and keep the passphrase private. Runs after 6.7. `keygen` prints the key id. Pin it in `apps/<app>/trust-anchor.json`, review that file in a commit, and record the id out of band (for example a password manager entry).
+  - [x] 6.6 **Human:** run `keygen` and keep the passphrase private. Runs after 6.7. `keygen` prints the key id. Pin it in `apps/<app>/trust-anchor.json`, review that file in a commit, and record the id out of band (for example a password manager entry).
   - _Requirements: R5, R8_
 
 - [ ] 7. Ground-truth protection and hooks (box: 1.5 h; depends on 6) - not started
